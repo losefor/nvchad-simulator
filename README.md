@@ -127,14 +127,6 @@ pnpm dev
 
 The application will be available at `http://localhost:5173`
 
-## Documentation
-
-Comprehensive guides for different needs:
-
-- **[Quick Start Guide](docs/QUICK_START.md)** - Get running in 5 minutes, learn your first lesson
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Deep dive into how the simulator works
-- **[Screenshots Guide](docs/SCREENSHOTS.md)** - Visual tour of the interface
-
 ## Usage
 
 ### Learning Lessons
