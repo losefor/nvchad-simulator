@@ -52,8 +52,8 @@ interface Props {
   lesson: Lesson;
   messages: Message[];
   keyLog: KeyLogEntry[];
-  onCheck: () => void;
-  onSkip: () => void;
+  onCheck?: () => void;
+  onSkip?: () => void;
 }
 
 export default function Console({
@@ -80,9 +80,9 @@ export default function Console({
           ))}
         </div>
         <div className="console-actions">
-          <button className="btn-primary" onClick={onCheck}>Check ✓</button>
+          {onCheck && <button className="btn-primary" onClick={onCheck}>Check ✓</button>}
           <button className="btn-ghost" onClick={() => setTab("hints")}>Hint</button>
-          <button className="btn-ghost" onClick={onSkip}>Skip →</button>
+          {onSkip && <button className="btn-ghost" onClick={onSkip}>Skip →</button>}
         </div>
       </div>
       <div className="console-body">

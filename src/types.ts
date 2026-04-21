@@ -105,6 +105,9 @@ export interface UseSimulatorCallbacks {
   onKeyLog: (key: string) => void;
   onCheatsheetRequested: () => void;
   onTelescopeOpen?: (type: "files" | "grep" | "buffers") => void;
+  onSave?: (buffer: string[]) => void;
+  onNvimTreeToggle?: () => void;
+  onTerminalToggle?: () => void;
 }
 
 export interface UseSimulatorReturn {
@@ -112,6 +115,7 @@ export interface UseSimulatorReturn {
   completed: Set<string>;
   handleKey: (e: KeyboardEvent) => void;
   loadLesson: (index: number) => void;
+  loadBuffer: (lines: string[], filename?: string) => void;
   runCheck: () => void;
   skipLesson: () => void;
 }

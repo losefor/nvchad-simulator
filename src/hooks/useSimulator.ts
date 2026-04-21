@@ -46,7 +46,7 @@ function createInitialState(): SimulatorState {
   };
 }
 
-export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen }: UseSimulatorCallbacks): UseSimulatorReturn {
+export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle }: UseSimulatorCallbacks): UseSimulatorReturn {
   const sRef = useRef<SimulatorState>(createInitialState());
   const [, setTick] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(() => {
@@ -62,10 +62,10 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
   const handleKeyRef = useRef<((e: KeyboardEvent) => void) | null>(null);
   const lastFindRef = useRef<{ char: string; till: boolean; back: boolean } | null>(null);
 
-  const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen });
+  const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle });
   useEffect(() => {
-    cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen };
-  }, [onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen]);
+    cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle };
+  }, [onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle]);
 
   const curLine = () => sRef.current.buffer[sRef.current.cursor[0]];
   const setCurLine = (str: string) => {
@@ -503,6 +503,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     if (!cmd) return;
     if (cmd === "w" || cmd === "write") {
       s.modified = false; s.flags.saved = true;
+      cb.current.onSave?.(s.buffer.slice());
       cb.current.onMessage(`"lesson.txt" ${s.buffer.length}L, ${s.buffer.reduce((a, l) => a + l.length, 0)}B written`, "success");
       return;
     }
@@ -589,10 +590,8 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       cb.current.onTelescopeOpen?.("buffers");
       s.keyBuf = ""; return;
     }
-    if (seq === " e") { s.flags.nvimTreeToggled = true; cb.current.onMessage("◌ NvimTree focus (simulated)", "success"); s.keyBuf = ""; return; }
-    if (seq === " h") { s.flags.terminalOpened = true; cb.current.onMessage("◌ Horizontal terminal opened (simulated)", "success"); s.keyBuf = ""; return; }
-    if (seq === " v") { s.flags.terminalOpened = true; cb.current.onMessage("◌ Vertical terminal opened (simulated)", "success"); s.keyBuf = ""; return; }
-    if (seq === " i") { s.flags.terminalOpened = true; cb.current.onMessage("◌ Floating terminal opened (simulated)", "success"); s.keyBuf = ""; return; }
+    if (seq === " e") { s.flags.nvimTreeToggled = true; cb.current.onNvimTreeToggle?.(); cb.current.onMessage("◌ NvimTree toggled", "success"); s.keyBuf = ""; return; }
+    if (seq === " h" || seq === " v" || seq === " i") { s.flags.terminalOpened = true; cb.current.onTerminalToggle?.(); cb.current.onMessage("◌ Terminal toggled", "success"); s.keyBuf = ""; return; }
     if (seq === " x") { cb.current.onMessage("◌ :bd (buffer closed — simulated)"); s.keyBuf = ""; return; }
     if (seq === " n") { cb.current.onMessage("◌ Line numbers toggled (simulated)"); s.keyBuf = ""; return; }
     if (seq === " ch") { s.flags.cheatsheetOpened = true; cb.current.onCheatsheetRequested(); s.keyBuf = ""; return; }
@@ -638,6 +637,24 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       setTimeout(() => { if (s.currentLesson < LESSONS.length - 1) loadLesson(s.currentLesson + 1); }, 1100);
     }
   };
+
+  const loadBuffer = useCallback((lines: string[]) => {
+    const s = sRef.current;
+    s.buffer = lines.length ? lines : [""];
+    s.cursor = [0, 0];
+    s.mode = "normal";
+    s.keyBuf = "";
+    s.visualStart = null;
+    s.modified = false;
+    s.history = [];
+    s.redoStack = [];
+    s.cmdText = "";
+    s.cmdPrefix = ":";
+    s.macroRecording = null;
+    s.macroBuffer = [];
+    s.activeRegister = null;
+    rerender();
+  }, [rerender]);
 
   const loadLesson = useCallback((idx: number) => {
     const lesson = LESSONS[idx];
@@ -847,7 +864,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         if (k === "r") { redo(); checkLesson(); rerender(); return; }
         if (k === "d") { motionJ(10); rerender(); return; }
         if (k === "u") { motionK(10); rerender(); return; }
-        if (k === "n") { s.flags.nvimTreeToggled = true; cb.current.onMessage("◌ NvimTree toggled (simulated)", "success"); checkLesson(); rerender(); return; }
+        if (k === "n") { s.flags.nvimTreeToggled = true; cb.current.onNvimTreeToggle?.(); cb.current.onMessage("◌ NvimTree toggled", "success"); checkLesson(); rerender(); return; }
         if (k === "w") { s.keyBuf = "<C-w>"; rerender(); return; }
         return;
       }
@@ -1102,5 +1119,5 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     macroRecording: sRef.current.macroRecording
   };
 
-  return { state, completed, handleKey, loadLesson, runCheck, skipLesson };
+  return { state, completed, handleKey, loadLesson, loadBuffer, runCheck, skipLesson };
 }

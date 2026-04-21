@@ -49,6 +49,9 @@ button { font-family: inherit; cursor: pointer; }
   height: 100vh;
   width: 100vw;
 }
+.app.nvimtree-open {
+  grid-template-columns: 260px 200px 1fr;
+}
 
 .main-col {
   display: grid;
@@ -562,3 +565,164 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--fg-dim); font-size: 11px;
   text-align: right;
 }
+
+/* ---------------- NvimTree ---------------- */
+.nvimtree {
+  width: 200px;
+  min-width: 200px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+}
+.nvimtree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border);
+}
+.nvimtree-title { color: var(--accent); font-size: 12px; font-weight: 600; }
+.nvimtree-close {
+  background: none; border: none; color: var(--fg-dim); cursor: pointer;
+  font-size: 16px; padding: 0 2px; line-height: 1;
+}
+.nvimtree-close:hover { color: var(--fg-bright); }
+.nvimtree-root-label {
+  padding: 4px 10px;
+  color: var(--fg-dim);
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+}
+.nvimtree-body { overflow-y: auto; flex: 1; padding: 4px 0; }
+.nt-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+}
+.nt-item:hover { background: var(--bg-sel); }
+.nt-active { background: var(--bg-sel) !important; color: var(--fg-bright); }
+.nt-arrow { color: var(--fg-dim); font-size: 10px; min-width: 10px; }
+.nt-icon { color: var(--blue); font-size: 13px; }
+.nt-dir .nt-icon { color: var(--accent); }
+.nt-name { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------------- Terminal ---------------- */
+.terminal {
+  flex-shrink: 0;
+  height: 260px;
+  background: var(--bg-darker);
+  border-top: 2px solid var(--green);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  overflow: hidden;
+  cursor: text;
+}
+.terminal-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.terminal-label {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--green);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.terminal-cwd { color: var(--accent); font-size: 11px; }
+.terminal-close {
+  background: none; border: none; color: var(--fg-dim); cursor: pointer;
+  font-size: 16px; padding: 0 2px; line-height: 1;
+}
+.terminal-close:hover { color: var(--red); }
+.terminal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 10px;
+}
+.tl { line-height: 1.55; white-space: pre-wrap; word-break: break-all; }
+.tl-input { color: var(--green); }
+.tl-output { color: var(--fg); }
+.tl-error { color: var(--red); }
+.tl-current { display: flex; align-items: center; }
+.terminal-prompt { color: var(--green); white-space: pre; flex-shrink: 0; }
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--fg-bright);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  caret-color: var(--cursor);
+}
+
+/* ---------------- VFS bar ---------------- */
+.vfs-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--bg-darker);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.vfs-btn {
+  background: var(--bg-float);
+  border: 1px solid var(--border);
+  color: var(--fg-dim);
+  padding: 2px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-family: var(--mono);
+  transition: all .15s;
+}
+.vfs-btn:hover { border-color: var(--accent); color: var(--fg-bright); }
+.vfs-btn-on { border-color: var(--green); color: var(--green); }
+.vfs-file-indicator {
+  margin-left: auto;
+  color: var(--fg-dim);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vfs-file-indicator strong { color: var(--accent); }
+.vfs-exit {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--fg-dim);
+  padding: 1px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.vfs-exit:hover { border-color: var(--red); color: var(--red); }
+
+/* ---------------- VFS editor header ---------------- */
+.vfs-header {
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-alt);
+}
+.vfs-path { color: var(--accent); font-family: var(--mono); font-size: 13px; }
+.vfs-hint { color: var(--fg-dim); font-size: 11px; }
