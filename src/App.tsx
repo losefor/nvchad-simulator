@@ -6,6 +6,7 @@ import Sidebar from "./components/Sidebar";
 import Editor from "./components/Editor";
 import Console from "./components/Console";
 import Cheatsheet from "./components/Cheatsheet";
+import Telescope from "./components/Telescope";
 import Toast from "./components/Toast";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
   const [keyLog, setKeyLog] = useState<KeyLogEntry[]>([]);
   const [toast, setToast] = useState<Toast | null>(null);
   const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
+  const [telescopeOpen, setTelescopeOpen] = useState<{ type: "files" | "grep" | "buffers" } | null>(null);
 
   const onToast = useCallback((text: string, kind: Message["kind"]) => {
     setToast({ text, kind });
@@ -38,6 +40,10 @@ export default function App() {
 
   const onCheatsheetRequested = useCallback(() => setCheatsheetOpen(true), []);
 
+  const onTelescopeOpen = useCallback((type: "files" | "grep" | "buffers") => {
+    setTelescopeOpen({ type });
+  }, []);
+
   const {
     state,
     completed,
@@ -45,9 +51,10 @@ export default function App() {
     loadLesson,
     runCheck,
     skipLesson
-  } = useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested });
+  } = useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen });
 
   useEffect(() => {
+    if (telescopeOpen) return;
     const listener = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
@@ -64,7 +71,7 @@ export default function App() {
     };
     window.addEventListener("keydown", listener);
     return () => window.removeEventListener("keydown", listener);
-  }, [handleKey, state.mode]);
+  }, [handleKey, state.mode, telescopeOpen]);
 
   useEffect(() => {
     loadLesson(0);
@@ -80,6 +87,11 @@ export default function App() {
       }
     ]);
   }, [state.currentLesson, currentLesson.title]);
+
+  const handleTelescopeSelect = useCallback((item: string) => {
+    onMessage(`Opened: ${item}`, "success");
+    setTelescopeOpen(null);
+  }, [onMessage]);
 
   return (
     <div className="app">
@@ -103,6 +115,13 @@ export default function App() {
       </div>
 
       <Cheatsheet open={cheatsheetOpen} onClose={() => setCheatsheetOpen(false)} />
+      {telescopeOpen && (
+        <Telescope
+          type={telescopeOpen.type}
+          onClose={() => setTelescopeOpen(null)}
+          onSelect={handleTelescopeSelect}
+        />
+      )}
       <Toast toast={toast} />
     </div>
   );

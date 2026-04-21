@@ -23,6 +23,7 @@
   --nvim-green: #87c095;
   --cursor: #f4c08d;
   --selection: rgba(97,175,239,0.25);
+  --bg-sel: rgba(97,175,239,0.15);
   --shadow: 0 8px 24px rgba(0,0,0,0.35);
   --radius: 8px;
   --mono: "JetBrainsMono Nerd Font", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
@@ -505,3 +506,59 @@ button { font-family: inherit; cursor: pointer; }
 ::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
 
 .hidden { display: none !important; }
+
+/* ---------------- Telescope ---------------- */
+.telescope-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 50;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 80px;
+}
+.telescope-modal {
+  width: min(680px, 92vw);
+  background: var(--bg-float);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  max-height: 60vh;
+}
+.telescope-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border);
+}
+.telescope-title { color: var(--accent); font-size: 13px; font-weight: 600; }
+.telescope-hint { color: var(--fg-dim); font-size: 11px; }
+.telescope-input-row {
+  display: flex; align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  gap: 6px;
+}
+.telescope-prompt { color: var(--green); font-size: 14px; }
+.telescope-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--fg); font-family: var(--mono); font-size: 13px;
+}
+.telescope-results { overflow-y: auto; flex: 1; }
+.telescope-empty { padding: 12px; color: var(--fg-dim); font-size: 13px; text-align: center; }
+.telescope-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px; cursor: pointer; font-size: 13px;
+  transition: background .1s;
+}
+.telescope-item:hover { background: var(--bg-sel); }
+.telescope-item-sel { background: var(--bg-sel); }
+.telescope-idx { color: var(--fg-dim); min-width: 20px; font-size: 11px; text-align: right; }
+.telescope-name { color: var(--fg); font-family: var(--mono); }
+.telescope-footer {
+  padding: 4px 12px;
+  background: var(--bg-darker);
+  border-top: 1px solid var(--border);
+  color: var(--fg-dim); font-size: 11px;
+  text-align: right;
+}
