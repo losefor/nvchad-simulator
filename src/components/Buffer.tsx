@@ -1,11 +1,5 @@
-import type { Mode } from "../types";
+import type { Mode, VisualRange } from "../types";
 import Cursor from "./Cursor";
-
-interface VisualRange {
-  start: [number, number];
-  end: [number, number];
-  line: boolean;
-}
 
 interface Props {
   buffer: string[];
@@ -17,6 +11,12 @@ interface Props {
 function inRange(r: number, c: number, sel: VisualRange | null): boolean {
   if (!sel) return false;
   if (sel.line) return r >= sel.start[0] && r <= sel.end[0];
+  if (sel.block) {
+    if (r < sel.start[0] || r > sel.end[0]) return false;
+    const c1 = Math.min(sel.start[1], sel.end[1]);
+    const c2 = Math.max(sel.start[1], sel.end[1]);
+    return c >= c1 && c <= c2;
+  }
   if (r < sel.start[0] || r > sel.end[0]) return false;
   if (r === sel.start[0] && c < sel.start[1]) return false;
   if (r === sel.end[0] && c > sel.end[1]) return false;

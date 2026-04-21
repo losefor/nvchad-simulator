@@ -1316,6 +1316,59 @@ export const LESSONS: Lesson[] = [
     check: (s) => s.cursor[0] >= 3
   },
   {
+    id: "a-visual-block",
+    title: "Visual Block Mode: Ctrl-v",
+    section: "ADVANCED",
+    badge: "edit",
+    desc: "Visual block mode (<code>Ctrl-v</code>) selects a rectangular column region. Perfect for multi-line edits.",
+    task: "Press <code>Ctrl-v</code>, select a column with <code>jj</code>, then delete with <code>d</code>.",
+    buffer: [
+      "  alpha",
+      "  beta",
+      "  gamma",
+      "",
+      "Ctrl-v = visual block mode",
+      "d = delete selected block"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Press <code>Ctrl-v</code> to enter VISUAL BLOCK mode.",
+      "Use <code>j</code> to extend selection down 2 rows.",
+      "Press <code>d</code> to delete the selected block."
+    ],
+    check: (s) => s.mode === "normal" && !s.buffer[0].startsWith("  ")
+  },
+  {
+    id: "sandbox",
+    title: "Free Play Sandbox",
+    section: "GRADUATION",
+    badge: "chad",
+    desc: "A blank slate to practice anything you've learned. No validation — just pure vim editing. Try text objects, macros, registers, marks, or any advanced motion.",
+    task: "This is free play mode. There's nothing to complete — practice whatever you like. Try <code>qa</code> to record a macro, <code>\"ay</code> for registers, <code>ma</code> for marks, or text objects like <code>diw</code>.",
+    buffer: [
+      "-- Sandbox: practice freely --",
+      "",
+      "function hello(name)",
+      "  print('Hello, ' .. name)",
+      "end",
+      "",
+      "local words = { 'vim', 'neovim', 'nvchad' }",
+      "for i, word in ipairs(words) do",
+      "  hello(word)",
+      "end",
+      "",
+      "-- Try: diw, ci(, yap, visual block, macros",
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "No task to complete — this is free exploration.",
+      "Try <code>ciw</code> to change a word, <code>yap</code> to yank a paragraph.",
+      "Try <code>qa</code> to record, then <code>@a</code> to replay a macro.",
+      "Press <code>ma</code> to set mark a, then <code>'a</code> to jump back to it."
+    ],
+    check: () => false
+  },
+  {
     id: "graduation",
     title: "🎓 Graduation: Master of NvChad",
     section: "GRADUATION",

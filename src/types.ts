@@ -1,4 +1,4 @@
-export type Mode = "normal" | "insert" | "visual" | "visual-line" | "command";
+export type Mode = "normal" | "insert" | "visual" | "visual-line" | "visual-block" | "command";
 export type Section = "BEGINNER" | "MEDIUM" | "ADVANCED" | "GRADUATION";
 
 export interface SimulatorFlags {
@@ -25,6 +25,13 @@ export interface HistoryEntry {
   cursor: [number, number];
 }
 
+export interface VisualRange {
+  start: [number, number];
+  end: [number, number];
+  line: boolean;
+  block: boolean;
+}
+
 export interface SimulatorState {
   mode: Mode;
   buffer: string[];
@@ -41,6 +48,12 @@ export interface SimulatorState {
   currentLesson: number;
   theme: number;
   flags: SimulatorFlags;
+  registers: Record<string, Yank>;
+  macros: Record<string, string[]>;
+  macroRecording: string | null;
+  macroBuffer: string[];
+  activeRegister: string | null;
+  marks: Record<string, [number, number]>;
 }
 
 export interface Lesson {
@@ -91,6 +104,7 @@ export interface UseSimulatorCallbacks {
   onMessage: (text: string, kind?: Message["kind"]) => void;
   onKeyLog: (key: string) => void;
   onCheatsheetRequested: () => void;
+  onTelescopeOpen?: (type: "files" | "grep" | "buffers") => void;
 }
 
 export interface UseSimulatorReturn {
