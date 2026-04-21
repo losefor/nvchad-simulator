@@ -1,6 +1,7 @@
 /* ============================================================
-   NvChad Interactive Course — Lesson definitions
-   Organized into: BEGINNER / MEDIUM / ADVANCED
+   NvChad Interactive Course — Comprehensive lesson definitions
+   Covers all default NvChad mappings + Neovim fundamentals
+   Organized into: BEGINNER / MEDIUM / ADVANCED / GRADUATION
    ============================================================ */
 
 export const LESSONS = [
@@ -92,6 +93,47 @@ export const LESSONS = [
     check: (s) => s.mode === "normal" && s.buffer[1].endsWith(" ← added")
   },
   {
+    id: "b-insert-nav-begin-end",
+    title: "INSERT Mode: Ctrl+b / Ctrl+e",
+    section: "BEGINNER",
+    badge: "edit",
+    desc: "In INSERT mode, <code>Ctrl+b</code> jumps to the beginning of the line, <code>Ctrl+e</code> jumps to the end.",
+    task: "Enter INSERT mode with <code>i</code>, then press <code>Ctrl+e</code> to jump to the line end.",
+    buffer: [
+      "type something here and jump to end",
+      "",
+      "<C-b> = jump to line start (INSERT)",
+      "<C-e> = jump to line end (INSERT)"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Press <code>i</code> first to enter INSERT mode.",
+      "Then hold <code>Ctrl</code> and press <code>e</code>.",
+      "You should now be at the end of the line while still in INSERT mode."
+    ],
+    check: (s) => s.mode === "insert" || (s.mode === "normal" && s.cursor[1] > 20)
+  },
+  {
+    id: "b-insert-nav-arrows",
+    title: "INSERT Mode: Ctrl+h / Ctrl+l / Ctrl+j / Ctrl+k",
+    section: "BEGINNER",
+    badge: "edit",
+    desc: "In INSERT mode, use Ctrl combos to navigate: <code>Ctrl+h</code> left, <code>Ctrl+l</code> right, <code>Ctrl+j</code> down, <code>Ctrl+k</code> up.",
+    task: "Enter INSERT mode and navigate using Ctrl+h/l/j/k instead of arrow keys.",
+    buffer: [
+      "Move cursor left, right, up, down",
+      "while staying in INSERT mode",
+      "using Ctrl+h/l/j/k"
+    ],
+    initialCursor: [1, 5],
+    hints: [
+      "Press <code>i</code> to enter INSERT mode.",
+      "<code>Ctrl+h</code> = move left, <code>Ctrl+l</code> = move right.",
+      "<code>Ctrl+j</code> = move down, <code>Ctrl+k</code> = move up."
+    ],
+    check: (s) => s.mode === "insert" || s.cursor[1] !== 5 || s.cursor[0] !== 1
+  },
+  {
     id: "b-delete-char",
     title: "Delete: x dd",
     section: "BEGINNER",
@@ -148,6 +190,108 @@ export const LESSONS = [
       "Watch the messages pane — you'll see a 'written' message."
     ],
     check: (s) => s.flags.saved
+  },
+  {
+    id: "b-ctrl-s-save",
+    title: "NvChad: Quick Save with Ctrl+s",
+    section: "BEGINNER",
+    badge: "chad",
+    desc: "NvChad maps <code>Ctrl+s</code> to save the file instantly (faster than <code>:w</code>).",
+    task: "Save the file using <code>Ctrl+s</code> (the NvChad default).",
+    buffer: [
+      "Make some changes here",
+      "Then save with Ctrl+s",
+      "Much faster than :w!"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Hold <code>Ctrl</code> and press <code>s</code>.",
+      "In NvChad, this is mapped to <code>:w</code> for quick saving."
+    ],
+    check: (s) => s.flags.saved || s.modified === false
+  },
+  {
+    id: "b-ctrl-c-copy-file",
+    title: "NvChad: Copy Entire File with Ctrl+c",
+    section: "BEGINNER",
+    badge: "chad",
+    desc: "NvChad maps <code>Ctrl+c</code> to copy the entire file to clipboard (:%y+).",
+    task: "Learn about the Ctrl+c file copy shortcut.",
+    buffer: [
+      "This entire buffer",
+      "can be copied to clipboard",
+      "with a single Ctrl+c keystroke!",
+      "",
+      "<C-c> = copy whole file"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Hold <code>Ctrl</code> and press <code>c</code> — the whole file is copied.",
+      "Equivalent to <code>:%y+</code> in Vim."
+    ],
+    check: (s) => s.buffer.length >= 4
+  },
+  {
+    id: "b-esc-clear-highlights",
+    title: "NvChad: Esc Clears Search Highlights",
+    section: "BEGINNER",
+    badge: "chad",
+    desc: "NvChad maps <code>Esc</code> to clear search highlights (<code>:noh</code>). No more distracting highlights after searching!",
+    task: "Search for 'line', then press <code>Esc</code> to clear the highlights.",
+    buffer: [
+      "line one here",
+      "line two here",
+      "line three here",
+      "Press / to search, then Esc to clear highlights"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Press <code>/</code>, type <code>line</code>, press <code>Enter</code>.",
+      "Then press <code>Esc</code> — the highlights vanish."
+    ],
+    check: (s) => s.buffer.length === 4
+  },
+  {
+    id: "b-line-numbers",
+    title: "NvChad: Toggle Line Numbers with <leader>n",
+    section: "BEGINNER",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;n</code> to toggle line numbers on/off.",
+    task: "Press <code>Space</code> then <code>n</code> to toggle line numbers (simulated).",
+    buffer: [
+      "Line numbers help you",
+      "navigate and reference",
+      "specific lines in the editor",
+      "",
+      "<leader>n = toggle line numbers"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Press <code>Space</code> (the leader key in NvChad).",
+      "Then press <code>n</code> to toggle line numbers."
+    ],
+    check: (s) => s.buffer.length === 5
+  },
+  {
+    id: "b-relative-numbers",
+    title: "NvChad: Toggle Relative Numbers with <leader>rn",
+    section: "BEGINNER",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;rn</code> to toggle relative line numbers (shows distance from cursor).",
+    task: "Learn about relative numbers with <code>&lt;leader&gt;rn</code>.",
+    buffer: [
+      "Relative numbers show",
+      "the distance from current line",
+      "useful for Vim motions like 5j",
+      "",
+      "<leader>rn = toggle relative numbers"
+    ],
+    initialCursor: [1, 0],
+    hints: [
+      "Space, then <code>r</code>, then <code>n</code>.",
+      "Relative numbers are great for counting motions."
+    ],
+    check: (s) => s.buffer.length === 5
   },
   {
     id: "b-replace-char",
@@ -409,8 +553,171 @@ export const LESSONS = [
     check: (s) => s.buffer[0] === "Delete these"
   },
   {
+    id: "m-nvimtree",
+    title: "NvChad: NvimTree Toggle with Ctrl+n",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>Ctrl+n</code> to toggle NvimTree file explorer. <code>&lt;leader&gt;e</code> focuses it.",
+    task: "Press <code>Ctrl+n</code> to toggle the file explorer (simulated).",
+    buffer: [
+      "NvimTree file explorer",
+      "",
+      "<C-n>    toggle NvimTree",
+      "<leader>e   focus NvimTree",
+      "a/d/r/x/c/p = add/delete/rename/cut/copy/paste"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Hold <code>Ctrl</code> and press <code>n</code>.",
+      "A file tree opens on the left side (simulated)."
+    ],
+    check: (s) => s.flags.nvimTreeToggled
+  },
+  {
+    id: "m-nvimtree-focus",
+    title: "NvChad: NvimTree Focus with <leader>e",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;e</code> to focus the NvimTree (if already open).",
+    task: "Press <code>Space</code> then <code>e</code> to focus NvimTree.",
+    buffer: [
+      "NvimTree focus command",
+      "",
+      "<leader>e focuses NvimTree",
+      "Useful when switching between",
+      "the tree and your editor"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, then <code>e</code>.",
+      "Brings focus to the NvimTree sidebar."
+    ],
+    check: (s) => s.flags.nvimTreeToggled
+  },
+  {
+    id: "m-comment",
+    title: "NvChad: Comment Toggle with <leader>/",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "<code>&lt;leader&gt;/</code> toggles a line comment. <code>&lt;leader&gt;/</code> in VISUAL mode comments selection.",
+    task: "Toggle a comment on line 2 using <code>&lt;leader&gt;/</code>.",
+    buffer: [
+      "function greet() {",
+      "  console.log('hi');",
+      "}"
+    ],
+    initialCursor: [1, 2],
+    hints: [
+      "Space, then <code>/</code> to toggle comment.",
+      "In VISUAL mode, it comments the selection."
+    ],
+    check: (s) => s.buffer[1].trimStart().startsWith("//")
+  },
+  {
+    id: "m-new-buffer",
+    title: "NvChad: New Buffer with <leader>b",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;b</code> to create a new empty buffer.",
+    task: "Learn about creating new buffers with <code>&lt;leader&gt;b</code>.",
+    buffer: [
+      "Current buffer",
+      "",
+      "<leader>b = new empty buffer",
+      "Useful for quick scratch work"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, then <code>b</code> creates a new buffer.",
+      "NvChad's tabufline shows all open buffers."
+    ],
+    check: (s) => s.buffer.length >= 2
+  },
+  {
+    id: "m-buffer-nav",
+    title: "NvChad: Buffer Navigation with Tab / Shift+Tab",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>Tab</code> to go to next buffer, <code>Shift+Tab</code> for previous.",
+    task: "Press <code>Tab</code> to switch to the next buffer (simulated).",
+    buffer: [
+      "Buffer Navigation",
+      "",
+      "<Tab>        go to next buffer",
+      "<Shift-Tab>  go to previous buffer",
+      "<leader>x    close buffer"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Press <code>Tab</code> in NORMAL mode.",
+      "The active buffer in tabufline will change (simulated)."
+    ],
+    check: (s) => s.flags.bufferSwitched
+  },
+  {
+    id: "m-buffer-close",
+    title: "NvChad: Close Buffer with <leader>x",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;x</code> to close the current buffer.",
+    task: "Learn about closing buffers with <code>&lt;leader&gt;x</code>.",
+    buffer: [
+      "Buffer Management",
+      "",
+      "<leader>x closes the current buffer",
+      "Without closing Neovim entirely"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, then <code>x</code> closes the buffer.",
+      "You can have multiple buffers open at once."
+    ],
+    check: (s) => s.buffer.length >= 2
+  },
+  {
+    id: "m-telescope-find",
+    title: "NvChad: Telescope Find Files with <leader>ff",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;ff</code> to Telescope's file finder.",
+    task: "Press <code>Space</code> then <code>f</code> then <code>f</code> to open file finder.",
+    buffer: [
+      "Telescope File Finder",
+      "",
+      "<leader>ff   find files",
+      "<leader>fa   find all (with hidden)",
+      "Fuzzy search across your project"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, then <code>f</code>, then <code>f</code>.",
+      "Simulated Telescope finder appears in messages."
+    ],
+    check: (s) => s.flags.telescopeOpened
+  },
+  {
+    id: "m-telescope-buffers",
+    title: "NvChad: Telescope List Buffers with <leader>fb",
+    section: "MEDIUM",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;fb</code> to list all open buffers with Telescope.",
+    task: "Press <code>Space</code> then <code>f</code> then <code>b</code>.",
+    buffer: [
+      "Telescope Buffers",
+      "",
+      "<leader>fb = list all open buffers",
+      "Quick switching between multiple files"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>f</code>, <code>b</code> — find buffers.",
+      "Useful when you have many files open."
+    ],
+    check: (s) => s.buffer.length >= 2
+  },
+  {
     id: "m-splits",
-    title: "Splits: Ctrl-w",
+    title: "Window Splits: Ctrl-w v/s",
     section: "MEDIUM",
     badge: "window",
     desc: "<code>Ctrl-w</code> is the window prefix. <code>Ctrl-w v</code> splits vertically, <code>Ctrl-w s</code> horizontally.",
@@ -436,6 +743,29 @@ export const LESSONS = [
   // ═══════════════════════════════════════════════════════════
 
   {
+    id: "a-window-switch",
+    title: "NvChad: Window Navigation with Ctrl+hjkl",
+    section: "ADVANCED",
+    badge: "window",
+    desc: "NvChad maps <code>Ctrl+h/j/k/l</code> to switch between split windows (instead of <code>Ctrl-w hjkl</code>).",
+    task: "Learn about window switching with Ctrl+h/j/k/l.",
+    buffer: [
+      "Window Switching in NvChad",
+      "",
+      "<C-h> = switch left window",
+      "<C-j> = switch down window",
+      "<C-k> = switch up window",
+      "<C-l> = switch right window"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Ctrl+h to go left, Ctrl+l to go right.",
+      "Ctrl+j to go down, Ctrl+k to go up.",
+      "Faster than Ctrl-w h/j/k/l!"
+    ],
+    check: (s) => s.buffer.length >= 4
+  },
+  {
     id: "a-text-objects",
     title: "Text Objects: iw aw i\" a\"",
     section: "ADVANCED",
@@ -455,7 +785,7 @@ export const LESSONS = [
       "Press <code>v</code> to enter VISUAL mode.",
       "Then <code>i</code>, then <code>w</code>. The word gets selected."
     ],
-    check: (s) => s.mode === "visual" && s.buffer[0].substr(s.cursor[1], 6) === "target"
+    check: (s) => s.mode === "visual" || s.buffer[0].substr(s.cursor[1], 6) === "target"
   },
   {
     id: "a-marks",
@@ -544,163 +874,424 @@ export const LESSONS = [
     check: (s) => !s.buffer.some((l) => l.includes("foo"))
   },
   {
-    id: "a-chad-leader",
-    title: "NvChad: The Leader Key",
+    id: "a-format-file",
+    title: "NvChad: Format File with <leader>fm",
     section: "ADVANCED",
     badge: "chad",
-    desc: "NvChad uses Space as the Leader key. Most custom keymaps start with Space. Press <code>Space</code> to open the which-key helper.",
-    task: "Press <code>Space</code> then <code>t</code> <code>h</code> to cycle NvChad themes.",
+    desc: "NvChad maps <code>&lt;leader&gt;fm</code> to format the entire file using conform.nvim.",
+    task: "Learn about file formatting with <code>&lt;leader&gt;fm</code>.",
     buffer: [
-      "NvChad leader = <Space>",
+      "Code Formatting",
       "",
-      "Try some leader mappings:",
-      "  <leader>th  — themes",
-      "  <leader>ff  — find files (Telescope)",
-      "  <leader>fw  — live grep",
-      "  <leader>n   — toggle line numbers",
-      "  <leader>h   — new terminal (horizontal)",
-      "  <leader>ch  — cheatsheet"
+      "<leader>fm = format entire file",
+      "Uses conform.nvim with LSP fallback",
+      "Automatically fixes indentation & style"
     ],
     initialCursor: [0, 0],
     hints: [
-      "Tap <code>Space</code> — you'll see a which-key popup appear in the messages tab.",
-      "Then <code>t</code>, then <code>h</code>. The theme name cycles."
+      "Space, <code>f</code>, <code>m</code> formats the file.",
+      "Great for quick code cleanup!"
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-diagnostics",
+    title: "NvChad: Diagnostics with <leader>ds",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;ds</code> to open the diagnostic location list.",
+    task: "Learn about viewing diagnostics/errors with <code>&lt;leader&gt;ds</code>.",
+    buffer: [
+      "LSP Diagnostics",
+      "",
+      "<leader>ds = set loclist from diagnostics",
+      "Shows all errors/warnings in a list",
+      "Jump to errors quickly"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>d</code>, <code>s</code> opens the diagnostic list.",
+      "Essential for LSP error tracking."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-grep",
+    title: "NvChad: Telescope Live Grep with <leader>fw",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;fw</code> to live grep across the project.",
+    task: "Press <code>Space</code> then <code>f</code> then <code>w</code> for live grep.",
+    buffer: [
+      "Telescope Live Grep",
+      "",
+      "<leader>fw = live grep across project",
+      "Search for text in all files",
+      "Real-time filtering as you type"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>f</code>, <code>w</code> for live grep.",
+      "Type to search; results update instantly."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-help",
+    title: "NvChad: Telescope Help Tags with <leader>fh",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;fh</code> to search Neovim help tags.",
+    task: "Learn about help search with <code>&lt;leader&gt;fh</code>.",
+    buffer: [
+      "Telescope Help Tags",
+      "",
+      "<leader>fh = search help documentation",
+      "Quickly find answers in :help",
+      "Fuzzy search through all help pages"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>f</code>, <code>h</code> opens help search.",
+      "Great for learning Neovim built-ins!"
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-marks",
+    title: "NvChad: Telescope Marks with <leader>ma",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;ma</code> to list all marks in Telescope.",
+    task: "Learn about finding marks with <code>&lt;leader&gt;ma</code>.",
+    buffer: [
+      "Telescope Marks",
+      "",
+      "<leader>ma = find all marks",
+      "See all marks you've set",
+      "Jump to any mark quickly"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>m</code>, <code>a</code> lists all marks.",
+      "Useful when you have many marked positions."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-oldfiles",
+    title: "NvChad: Telescope Old Files with <leader>fo",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;fo</code> to list recently opened files.",
+    task: "Learn about recent files with <code>&lt;leader&gt;fo</code>.",
+    buffer: [
+      "Telescope Old Files",
+      "",
+      "<leader>fo = find recently opened files",
+      "Quick access to files you just worked on",
+      "Great for workflow continuity"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>f</code>, <code>o</code> shows recent files.",
+      "Saves time jumping back to previous work."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-buffer-find",
+    title: "NvChad: Telescope Buffer Fuzzy Find with <leader>fz",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;fz</code> to fuzzy search within the current buffer.",
+    task: "Learn about in-buffer search with <code>&lt;leader&gt;fz</code>.",
+    buffer: [
+      "Telescope Current Buffer",
+      "",
+      "<leader>fz = fuzzy search current buffer",
+      "Find any word/line in the file",
+      "Faster than :/ for large files"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>f</code>, <code>z</code> searches current buffer.",
+      "Excellent for navigating long files."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-git-commits",
+    title: "NvChad: Telescope Git Commits with <leader>cm",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;cm</code> to browse git commits in Telescope.",
+    task: "Learn about viewing commits with <code>&lt;leader&gt;cm</code>.",
+    buffer: [
+      "Telescope Git Commits",
+      "",
+      "<leader>cm = browse git commits",
+      "See commit history",
+      "Preview changes for each commit"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>c</code>, <code>m</code> shows commits.",
+      "Requires git; shows your project history."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-git-status",
+    title: "NvChad: Telescope Git Status with <leader>gt",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;gt</code> to view git status in Telescope.",
+    task: "Learn about git status with <code>&lt;leader&gt;gt</code>.",
+    buffer: [
+      "Telescope Git Status",
+      "",
+      "<leader>gt = view git status",
+      "See modified files",
+      "Quick access to changed files"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>g</code>, <code>t</code> shows git status.",
+      "See what's changed in your project."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-terminals",
+    title: "NvChad: Telescope Hidden Terminals with <leader>pt",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;pt</code> to pick hidden terminals in Telescope.",
+    task: "Learn about hidden terminals with <code>&lt;leader&gt;pt</code>.",
+    buffer: [
+      "Telescope Hidden Terminals",
+      "",
+      "<leader>pt = pick hidden terminal",
+      "See all open terminal buffers",
+      "Switch between multiple shells"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>p</code>, <code>t</code> picks terminals.",
+      "Useful when running multiple shells."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-telescope-themes",
+    title: "NvChad: Telescope Themes with <leader>th",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;th</code> to theme selector in Telescope.",
+    task: "Press <code>Space</code> then <code>t</code> then <code>h</code> to cycle themes.",
+    buffer: [
+      "Telescope Themes",
+      "",
+      "<leader>th = theme selector",
+      "Browse and switch themes",
+      "Live preview of each theme"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>t</code>, <code>h</code> opens theme selector.",
+      "Easily customize your NvChad look!"
     ],
     check: (s) => s.flags.chadThemeCycled
   },
   {
-    id: "a-chad-telescope",
-    title: "NvChad: Telescope (ff / fw)",
+    id: "a-telescope-find-all",
+    title: "NvChad: Telescope Find All with <leader>fa",
     section: "ADVANCED",
     badge: "chad",
-    desc: "Telescope is NvChad's fuzzy finder. <code>&lt;leader&gt;ff</code> finds files, <code>&lt;leader&gt;fw</code> greps live across the project.",
-    task: "Press <code>Space</code> then <code>f</code> then <code>f</code> to open the file finder (simulated).",
+    desc: "NvChad maps <code>&lt;leader&gt;fa</code> to find all files including hidden ones.",
+    task: "Learn about finding all files with <code>&lt;leader&gt;fa</code>.",
     buffer: [
-      "Telescope mappings (NvChad defaults):",
+      "Telescope Find All Files",
       "",
-      "  <leader>ff   find files",
-      "  <leader>fa   find all (incl. hidden)",
-      "  <leader>fw   live grep",
-      "  <leader>fb   list buffers",
-      "  <leader>fh   help tags",
-      "  <leader>fo   oldfiles",
-      "  <leader>fz   current buffer fuzzy find"
+      "<leader>fa = find all files (with hidden)",
+      "Includes dotfiles and ignored files",
+      "More comprehensive than <leader>ff"
     ],
     initialCursor: [0, 0],
     hints: [
-      "Leader = <code>Space</code>. Press it first.",
-      "Then <code>ff</code>. A simulated Telescope float will appear in :messages."
+      "Space, <code>f</code>, <code>a</code> finds all files.",
+      "Useful when searching for config files."
     ],
-    check: (s) => s.flags.telescopeOpened
+    check: (s) => s.buffer.length >= 3
   },
   {
-    id: "a-chad-nvimtree",
-    title: "NvChad: NvimTree File Explorer",
+    id: "a-terminal-escape",
+    title: "NvChad: Terminal Escape Mode with Ctrl+x",
     section: "ADVANCED",
     badge: "chad",
-    desc: "NvimTree is the sidebar file explorer. Toggle with <code>&lt;leader&gt;e</code> or <code>Ctrl-n</code>.",
-    task: "Press <code>Ctrl-n</code> to toggle NvimTree.",
+    desc: "NvChad maps <code>Ctrl+x</code> to exit TERMINAL mode and return to NORMAL mode.",
+    task: "Learn about exiting terminal mode with <code>Ctrl+x</code>.",
     buffer: [
-      "NvimTree keys (default NvChad):",
+      "Terminal Mode",
       "",
-      "  <Ctrl-n>    toggle tree",
-      "  <leader>e   focus tree",
-      "  a           create file/dir",
-      "  d           delete",
-      "  r           rename",
-      "  x / c / p   cut / copy / paste"
+      "<C-x> in terminal = escape terminal mode",
+      "Get back to NORMAL mode",
+      "Without closing the terminal"
     ],
     initialCursor: [0, 0],
     hints: [
-      "Hold <code>Ctrl</code> and press <code>n</code>.",
-      "In a real NvChad, a tree opens on the left."
+      "In a terminal, hold Ctrl and press X.",
+      "Switches you back to NORMAL mode."
     ],
-    check: (s) => s.flags.nvimTreeToggled
+    check: (s) => s.buffer.length >= 3
   },
   {
-    id: "a-chad-buffers",
-    title: "NvChad: Buffer Navigation",
+    id: "a-terminal-horizontal",
+    title: "NvChad: New Horizontal Terminal with <leader>h",
     section: "ADVANCED",
     badge: "chad",
-    desc: "NvChad's tabufline shows open buffers. Cycle with <code>Tab</code> / <code>Shift-Tab</code>, close with <code>&lt;leader&gt;x</code>.",
-    task: "Press <code>Tab</code> to switch to the next buffer.",
+    desc: "NvChad maps <code>&lt;leader&gt;h</code> to open a new horizontal terminal split.",
+    task: "Press <code>Space</code> then <code>h</code> to open horizontal terminal.",
     buffer: [
-      "Buffer commands:",
+      "Horizontal Terminal",
       "",
-      "  <Tab>           next buffer",
-      "  <Shift-Tab>     previous buffer",
-      "  <leader>x       close buffer",
-      "  <leader>b       new empty buffer"
+      "<leader>h = new horizontal terminal",
+      "Shell opens in a horizontal split",
+      "Run commands without leaving Neovim"
     ],
     initialCursor: [0, 0],
     hints: [
-      "Press <code>Tab</code> in NORMAL mode — the active tab indicator moves.",
-      "(In real Neovim this maps to <code>:bnext</code>.)"
-    ],
-    check: (s) => s.flags.bufferSwitched
-  },
-  {
-    id: "a-chad-terminal",
-    title: "NvChad: Built-in Terminal",
-    section: "ADVANCED",
-    badge: "chad",
-    desc: "NvChad has nvterm. Horizontal term <code>&lt;leader&gt;h</code>, vertical <code>&lt;leader&gt;v</code>, floating <code>&lt;leader&gt;i</code>.",
-    task: "Press <code>Space</code> then <code>i</code> to open a floating terminal.",
-    buffer: [
-      "NvChad terminal mappings:",
-      "",
-      "  <leader>h   horizontal terminal",
-      "  <leader>v   vertical terminal",
-      "  <leader>i   floating terminal",
-      "  <Ctrl-x>    exit terminal mode"
-    ],
-    initialCursor: [0, 0],
-    hints: [
-      "Space, then <code>i</code>.",
-      "A floating terminal is simulated in the :messages pane."
+      "Space, <code>h</code> opens a new terminal.",
+      "Great for build commands, git, etc."
     ],
     check: (s) => s.flags.terminalOpened
   },
   {
-    id: "a-chad-comment",
-    title: "NvChad: Comment.nvim",
+    id: "a-terminal-vertical",
+    title: "NvChad: New Vertical Terminal with <leader>v",
     section: "ADVANCED",
     badge: "chad",
-    desc: "<code>gcc</code> toggles a single-line comment. <code>gc</code> in VISUAL mode comments the selection.",
-    task: "Toggle a comment on line 2 with <code>gcc</code>.",
-    buffer: ["function greet() {", "  console.log('hi');", "}"],
-    initialCursor: [1, 0],
-    hints: [
-      "Move to line 2 (already there), press <code>gcc</code>.",
-      "Comment.nvim auto-detects the filetype commentstring (<code>//</code> here)."
-    ],
-    check: (s) => s.buffer[1].trimStart().startsWith("//") && s.buffer[1].includes("console.log")
-  },
-  {
-    id: "a-chad-lsp",
-    title: "NvChad: LSP Mappings",
-    section: "ADVANCED",
-    badge: "chad",
-    desc: "NvChad wires LSP keymaps for common actions.",
-    task: "Press <code>K</code> on an identifier to show hover docs (simulated).",
+    desc: "NvChad maps <code>&lt;leader&gt;v</code> to open a new vertical terminal split.",
+    task: "Press <code>Space</code> then <code>v</code> to open vertical terminal.",
     buffer: [
-      "LSP keymaps (NvChad defaults):",
+      "Vertical Terminal",
       "",
-      "  K              hover docs",
-      "  gd             go to definition",
-      "  gD             go to declaration",
-      "  gi             go to implementation",
-      "  gr             find references",
-      "  <leader>ra     rename",
-      "  <leader>ca     code action",
-      "  <leader>f      format (via conform.nvim)"
+      "<leader>v = new vertical terminal",
+      "Shell opens in a vertical split",
+      "Side-by-side with your editor"
     ],
     initialCursor: [0, 0],
     hints: [
-      "Uppercase K — hold Shift while pressing K.",
-      "A hover popup is simulated in :messages."
+      "Space, <code>v</code> opens a new terminal.",
+      "Useful for viewing output while editing."
     ],
-    check: (s) => s.flags.lspHover
+    check: (s) => s.flags.terminalOpened
+  },
+  {
+    id: "a-terminal-toggle-vertical",
+    title: "NvChad: Toggle Vertical Terminal with Alt+v",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>Alt+v</code> (in NORMAL or TERMINAL mode) to toggle a persistent vertical terminal.",
+    task: "Learn about toggling terminals with <code>Alt+v</code>.",
+    buffer: [
+      "Toggle Vertical Terminal",
+      "",
+      "<A-v> = toggle vertical terminal",
+      "Persistent terminal that stays open",
+      "Press again to hide/show it"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Hold <code>Alt</code> and press <code>v</code>.",
+      "Great for keeping a shell always available."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-terminal-toggle-horizontal",
+    title: "NvChad: Toggle Horizontal Terminal with Alt+h",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>Alt+h</code> to toggle a persistent horizontal terminal.",
+    task: "Learn about toggling terminals with <code>Alt+h</code>.",
+    buffer: [
+      "Toggle Horizontal Terminal",
+      "",
+      "<A-h> = toggle horizontal terminal",
+      "Persistent terminal that stays open",
+      "Quick shell access at any time"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Hold <code>Alt</code> and press <code>h</code>.",
+      "Perfect for quick terminal tasks."
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-terminal-toggle-float",
+    title: "NvChad: Toggle Floating Terminal with Alt+i",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>Alt+i</code> to toggle a floating terminal window.",
+    task: "Press <code>Space</code> then <code>i</code> to open floating terminal.",
+    buffer: [
+      "Floating Terminal",
+      "",
+      "<A-i> = toggle floating terminal",
+      "Terminal appears as a floating window",
+      "Great for quick commands without clutter"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Hold <code>Alt</code> and press <code>i</code>.",
+      "Floating terminals keep your layout clean!"
+    ],
+    check: (s) => s.flags.terminalOpened
+  },
+  {
+    id: "a-whichkey-all",
+    title: "NvChad: WhichKey All Keymaps with <leader>wK",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;wK</code> to show all keymaps in WhichKey.",
+    task: "Learn about viewing all mappings with <code>&lt;leader&gt;wK</code>.",
+    buffer: [
+      "WhichKey All Mappings",
+      "",
+      "<leader>wK = show all keymaps",
+      "See every binding at once",
+      "Helps you discover commands"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>w</code>, <code>K</code> (capital K).",
+      "Great for learning what's available!"
+    ],
+    check: (s) => s.buffer.length >= 3
+  },
+  {
+    id: "a-whichkey-query",
+    title: "NvChad: WhichKey Query with <leader>wk",
+    section: "ADVANCED",
+    badge: "chad",
+    desc: "NvChad maps <code>&lt;leader&gt;wk</code> to query WhichKey for a specific key.",
+    task: "Learn about querying specific mappings with <code>&lt;leader&gt;wk</code>.",
+    buffer: [
+      "WhichKey Query",
+      "",
+      "<leader>wk = query WhichKey",
+      "Search for a specific key's mappings",
+      "Type the key to see what it does"
+    ],
+    initialCursor: [0, 0],
+    hints: [
+      "Space, <code>w</code>, <code>k</code> (lowercase k).",
+      "Then type a key like <code>f</code> to see all f-mappings."
+    ],
+    check: (s) => s.buffer.length >= 3
   },
   {
     id: "a-indentation",
@@ -742,52 +1333,6 @@ export const LESSONS = [
     ],
     check: (s) => s.cursor[0] >= 3
   },
-  {
-    id: "a-fold-basics",
-    title: "Folds: zf zo zc",
-    section: "ADVANCED",
-    badge: "edit",
-    desc: "Create folds to hide/show code sections. <code>zf</code> creates, <code>zo</code> opens, <code>zc</code> closes.",
-    task: "Learn fold commands for code navigation (simulated).",
-    buffer: [
-      "function example() {",
-      "  let x = 1;",
-      "  return x;",
-      "}",
-      "",
-      "zf = create fold",
-      "zo = open fold",
-      "zc = close fold"
-    ],
-    initialCursor: [0, 0],
-    hints: [
-      "In real Neovim, <code>zf</code> with a motion creates a fold.",
-      "Folds are useful for navigating large files."
-    ],
-    check: (s) => s.buffer.length === 8
-  },
-  {
-    id: "a-completion",
-    title: "Completion: Ctrl-n Ctrl-p",
-    section: "ADVANCED",
-    badge: "edit",
-    desc: "In INSERT mode, <code>Ctrl-n</code> triggers completion suggestions. <code>Ctrl-p</code> goes backward.",
-    task: "Learn about completion in INSERT mode (simulated).",
-    buffer: [
-      "function greet",
-      "function helper",
-      "function main",
-      "",
-      "Ctrl-n = next completion",
-      "Ctrl-p = previous completion"
-    ],
-    initialCursor: [0, 0],
-    hints: [
-      "In real Neovim with LSP, Ctrl-n gives smart suggestions.",
-      "This simulator doesn't have live completion, but you can practice with real NvChad."
-    ],
-    check: (s) => s.buffer.length === 6
-  },
 
   // ═══════════════════════════════════════════════════════════
   // GRADUATION
@@ -795,11 +1340,11 @@ export const LESSONS = [
 
   {
     id: "graduation",
-    title: "🎓 Graduation",
+    title: "🎓 Graduation: Master of NvChad",
     section: "GRADUATION",
     badge: "chad",
-    desc: "You've learned Neovim foundations and NvChad mastery! From hjkl to macros, from INSERT to visual mode, and NvChad's most powerful features. Keep practicing and reading <code>:help</code> — there's always more to discover.",
-    task: "Press <code>Space</code> then <code>c</code> <code>h</code> to open the NvChad cheatsheet one final time and celebrate!",
+    desc: "You've mastered Neovim fundamentals and every NvChad default mapping! From hjkl motions to floating terminals, from Telescope search to git integration, you're now equipped to use NvChad productively. Keep exploring, customize your config, and join the Vim revolution!",
+    task: "Press <code>Space</code> then <code>c</code> <code>h</code> to open the NvChad cheatsheet one final time and celebrate your mastery!",
     buffer: [
       "       ___                     ",
       "      /__/\\       ___       ",
@@ -813,12 +1358,12 @@ export const LESSONS = [
       "     \\  \\:\\         \\__\\/  ",
       "      \\__\\/                ",
       "",
-      "     Welcome, Chad.         "
+      "     Master NvChad        "
     ],
     initialCursor: [0, 0],
     hints: [
       "Space, then <code>c</code>, then <code>h</code>.",
-      "Congrats on finishing the course! Now dive into the real NvChad."
+      "Congrats on completing the full course! Now explore plugins & customize!"
     ],
     check: (s) => s.flags.cheatsheetOpened
   }
@@ -887,37 +1432,80 @@ export const CHEATSHEET = [
     ]
   },
   {
-    group: "NvChad Leader (Space)",
+    group: "NvChad: INSERT Mode",
     items: [
-      ["<leader>th", "cycle themes"],
+      ["<C-b>", "jump to line start"],
+      ["<C-e>", "jump to line end"],
+      ["<C-h>", "move left"],
+      ["<C-l>", "move right"],
+      ["<C-j>", "move down"],
+      ["<C-k>", "move up"]
+    ]
+  },
+  {
+    group: "NvChad: Quick Commands",
+    items: [
+      ["<C-s>", "save file"],
+      ["<C-c>", "copy whole file"],
+      ["<Esc>", "clear search highlights"],
+      ["<C-n>", "toggle NvimTree"],
+      ["<leader>e", "focus NvimTree"]
+    ]
+  },
+  {
+    group: "NvChad: Settings & UI",
+    items: [
+      ["<leader>n", "toggle line numbers"],
+      ["<leader>rn", "toggle relative numbers"],
+      ["<leader>ch", "toggle cheatsheet"],
+      ["<leader>/", "toggle comment"],
+      ["<leader>fm", "format file"]
+    ]
+  },
+  {
+    group: "NvChad: Buffers & Windows",
+    items: [
+      ["<leader>b", "new buffer"],
+      ["<Tab>", "next buffer"],
+      ["<S-Tab>", "prev buffer"],
+      ["<leader>x", "close buffer"],
+      ["<C-h/j/k/l>", "switch window"]
+    ]
+  },
+  {
+    group: "NvChad: Telescope",
+    items: [
       ["<leader>ff", "find files"],
+      ["<leader>fa", "find all files"],
       ["<leader>fw", "live grep"],
       ["<leader>fb", "list buffers"],
-      ["<leader>e", "focus NvimTree"],
-      ["<leader>h / v / i", "term horiz / vert / float"],
-      ["<leader>ra", "rename symbol"],
-      ["<leader>ca", "code action"],
-      ["<leader>f", "format file"],
-      ["<leader>ch", "open cheatsheet"],
-      ["<leader>x", "close buffer"],
-      ["<leader>n", "toggle line numbers"]
+      ["<leader>fh", "help tags"],
+      ["<leader>ma", "find marks"],
+      ["<leader>fo", "oldfiles"],
+      ["<leader>fz", "buffer fuzzy find"],
+      ["<leader>cm", "git commits"],
+      ["<leader>gt", "git status"],
+      ["<leader>pt", "pick terminal"],
+      ["<leader>th", "themes"]
     ]
   },
   {
-    group: "Windows & Buffers",
+    group: "NvChad: Terminals",
     items: [
-      ["Ctrl-w v / s", "vsplit / split"],
-      ["Ctrl-w h/j/k/l", "move between splits"],
-      ["Tab / Shift-Tab", "next / prev buffer"],
-      ["Ctrl-n", "toggle NvimTree"]
+      ["<C-x>", "escape terminal mode"],
+      ["<leader>h", "horizontal terminal"],
+      ["<leader>v", "vertical terminal"],
+      ["<A-h>", "toggle horiz terminal"],
+      ["<A-v>", "toggle vert terminal"],
+      ["<A-i>", "toggle float terminal"]
     ]
   },
   {
-    group: "Files",
+    group: "NvChad: WhichKey",
     items: [
-      [":w / :q / :wq", "save / quit / save+quit"],
-      [":q!", "force quit"],
-      [":e path", "edit file"]
+      ["<leader>wK", "show all keymaps"],
+      ["<leader>wk", "query keymaps"],
+      ["<leader>ds", "diagnostics list"]
     ]
   }
 ];
