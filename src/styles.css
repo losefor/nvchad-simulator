@@ -586,6 +586,7 @@ button { font-family: inherit; cursor: pointer; }
   border-bottom: 1px solid var(--border);
 }
 .nvimtree-title { color: var(--accent); font-size: 12px; font-weight: 600; }
+.nvimtree-keys { color: var(--fg-dim); font-size: 10px; margin-left: 6px; flex: 1; }
 .nvimtree-close {
   background: none; border: none; color: var(--fg-dim); cursor: pointer;
   font-size: 16px; padding: 0 2px; line-height: 1;
@@ -609,6 +610,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 .nt-item:hover { background: var(--bg-sel); }
 .nt-active { background: var(--bg-sel) !important; color: var(--fg-bright); }
+.nt-cursor { background: var(--accent) !important; color: #1e222a !important; }
+.nt-cursor .nt-icon, .nt-cursor .nt-arrow { color: #1e222a !important; }
 .nt-arrow { color: var(--fg-dim); font-size: 10px; min-width: 10px; }
 .nt-icon { color: var(--blue); font-size: 13px; }
 .nt-dir .nt-icon { color: var(--accent); }

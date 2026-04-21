@@ -98,7 +98,7 @@ export default function App() {
     setTelescopeOpen(null);
   }, [onMessage]);
 
-  const anyModalOpen = telescopeOpen !== null || cheatsheetOpen;
+  const anyModalOpen = telescopeOpen !== null || cheatsheetOpen || nvimTreeOpen;
 
   useEffect(() => {
     if (anyModalOpen) return;
