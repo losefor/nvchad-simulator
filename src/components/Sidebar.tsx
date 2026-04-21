@@ -1,7 +1,15 @@
-import Brand from "./Brand.jsx";
-import ProgressBar from "./ProgressBar.jsx";
-import LessonList from "./LessonList.jsx";
-import { LESSONS } from "../data/lessons.js";
+import { LESSONS } from "../data/lessons";
+import Brand from "./Brand";
+import ProgressBar from "./ProgressBar";
+import LessonList from "./LessonList";
+
+interface Props {
+  currentLesson: number;
+  completed: Set<string>;
+  onSelect: (index: number) => void;
+  onReset: () => void;
+  onOpenCheatsheet: () => void;
+}
 
 export default function Sidebar({
   currentLesson,
@@ -9,7 +17,7 @@ export default function Sidebar({
   onSelect,
   onReset,
   onOpenCheatsheet
-}) {
+}: Props) {
   return (
     <aside className="sidebar">
       <Brand />

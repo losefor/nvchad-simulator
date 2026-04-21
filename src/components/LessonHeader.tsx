@@ -1,4 +1,11 @@
-export default function LessonHeader({ index, lesson }) {
+import type { Lesson } from "../types";
+
+interface Props {
+  index: number;
+  lesson: Lesson;
+}
+
+export default function LessonHeader({ index, lesson }: Props) {
   return (
     <div className="lesson-header">
       <div className="lesson-title-row">

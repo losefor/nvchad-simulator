@@ -1,4 +1,9 @@
-export default function Gutter({ lineCount, currentRow }) {
+interface Props {
+  lineCount: number;
+  currentRow: number;
+}
+
+export default function Gutter({ lineCount, currentRow }: Props) {
   const lines = [];
   for (let r = 0; r < lineCount; r++) {
     lines.push(

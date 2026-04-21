@@ -1,4 +1,9 @@
-export default function ProgressBar({ completed, total }) {
+interface Props {
+  completed: number;
+  total: number;
+}
+
+export default function ProgressBar({ completed, total }: Props) {
   const pct = total ? (completed / total) * 100 : 0;
   return (
     <div className="progress-wrap">

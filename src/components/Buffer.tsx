@@ -1,6 +1,21 @@
-import Cursor from "./Cursor.jsx";
+import type { Mode } from "../types";
+import Cursor from "./Cursor";
 
-function inRange(r, c, sel) {
+interface VisualRange {
+  start: [number, number];
+  end: [number, number];
+  line: boolean;
+}
+
+interface Props {
+  buffer: string[];
+  cursor: [number, number];
+  mode: Mode;
+  visualRange: VisualRange | null;
+}
+
+function inRange(r: number, c: number, sel: VisualRange | null): boolean {
+  if (!sel) return false;
   if (sel.line) return r >= sel.start[0] && r <= sel.end[0];
   if (r < sel.start[0] || r > sel.end[0]) return false;
   if (r === sel.start[0] && c < sel.start[1]) return false;
@@ -8,12 +23,12 @@ function inRange(r, c, sel) {
   return true;
 }
 
-function renderLine(line, r, sel) {
+function renderLine(line: string, r: number, sel: VisualRange | null) {
   if (!line.length) return <span>&nbsp;</span>;
   const parts = [];
   for (let c = 0; c < line.length; c++) {
     const ch = line[c];
-    const selected = sel && inRange(r, c, sel);
+    const selected = inRange(r, c, sel);
     parts.push(
       selected ? (
         <span key={c} className="sel">{ch}</span>
@@ -25,7 +40,7 @@ function renderLine(line, r, sel) {
   return parts;
 }
 
-export default function Buffer({ buffer, cursor, mode, visualRange }) {
+export default function Buffer({ buffer, cursor, mode, visualRange }: Props) {
   return (
     <div className="buffer-wrap">
       <div className="buffer">

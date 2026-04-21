@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LESSONS, THEMES } from "../data/lessons.js";
-
-/* ============================================================
-   useSimulator — mutable ref state + render counter pattern.
-   Mirrors the original imperative engine while integrating with React.
-   ============================================================ */
+import { LESSONS, THEMES } from "../data/lessons";
+import type { SimulatorState, UseSimulatorCallbacks, UseSimulatorReturn } from "../types";
 
 const initialFlags = () => ({
   undoUsed: false,
@@ -20,11 +16,11 @@ const initialFlags = () => ({
   cheatsheetOpened: false
 });
 
-function clamp(n, lo, hi) {
+function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
 }
 
-function createInitialState() {
+function createInitialState(): SimulatorState {
   return {
     mode: "normal",
     buffer: [""],
@@ -44,10 +40,10 @@ function createInitialState() {
   };
 }
 
-export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested }) {
-  const sRef = useRef(createInitialState());
+export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested }: UseSimulatorCallbacks): UseSimulatorReturn {
+  const sRef = useRef<SimulatorState>(createInitialState());
   const [, setTick] = useState(0);
-  const [completed, setCompleted] = useState(() => {
+  const [completed, setCompleted] = useState<Set<string>>(() => {
     try {
       const raw = localStorage.getItem("nvchad-sim-progress");
       return raw ? new Set(JSON.parse(raw)) : new Set();
@@ -58,15 +54,13 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
 
   const rerender = useCallback(() => setTick((t) => t + 1), []);
 
-  // Stable callback refs so we don't re-bind keydown on every render
   const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested });
   useEffect(() => {
     cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested };
   }, [onToast, onMessage, onKeyLog, onCheatsheetRequested]);
 
-  // -------- Buffer helpers --------
   const curLine = () => sRef.current.buffer[sRef.current.cursor[0]];
-  const setCurLine = (str) => {
+  const setCurLine = (str: string) => {
     sRef.current.buffer[sRef.current.cursor[0]] = str;
   };
 
@@ -84,7 +78,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     s.redoStack = [];
   };
 
-  // -------- Motions --------
   const motionH = (n = 1) => {
     sRef.current.cursor[1] = Math.max(0, sRef.current.cursor[1] - n);
   };
@@ -119,7 +112,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
   const motionG = () => {
     sRef.current.cursor = [sRef.current.buffer.length - 1, 0];
   };
-  const isWord = (ch) => /\w/.test(ch || "");
+  const isWord = (ch: string | undefined) => /\w/.test(ch || "");
 
   const motionW = (n = 1) => {
     const s = sRef.current;
@@ -173,7 +166,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       s.cursor = [r, c];
     }
   };
-  const motionFind = (ch, till = false, back = false) => {
+  const motionFind = (ch: string, till = false, back = false) => {
     const s = sRef.current;
     const line = curLine();
     const c = s.cursor[1];
@@ -193,7 +186,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     cb.current.onMessage(`'${ch}' not found on line`, "warn");
   };
 
-  // -------- Edits --------
   const deleteCharUnder = () => {
     const s = sRef.current;
     pushHistory();
@@ -276,8 +268,10 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     }
     s.redoStack.push({ buffer: s.buffer.slice(), cursor: [...s.cursor] });
     const prev = s.history.pop();
-    s.buffer = prev.buffer;
-    s.cursor = prev.cursor;
+    if (prev) {
+      s.buffer = prev.buffer;
+      s.cursor = prev.cursor;
+    }
     s.flags.undoUsed = true;
     cb.current.onMessage("1 change; older");
   };
@@ -289,8 +283,10 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     }
     s.history.push({ buffer: s.buffer.slice(), cursor: [...s.cursor] });
     const next = s.redoStack.pop();
-    s.buffer = next.buffer;
-    s.cursor = next.cursor;
+    if (next) {
+      s.buffer = next.buffer;
+      s.cursor = next.cursor;
+    }
   };
   const changeWord = () => {
     const s = sRef.current;
@@ -313,17 +309,16 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     s.modified = true;
   };
 
-  // -------- Visual ops --------
   const getVisualRange = () => {
     const s = sRef.current;
-    if (s.mode !== "visual" && s.mode !== "vline") return null;
+    if (s.mode !== "visual" && s.mode !== "visual-line") return null;
     if (!s.visualStart) return null;
     const a = s.visualStart;
     const b = s.cursor;
     const cmp =
       a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1];
     const [start, end] = cmp <= 0 ? [a, b] : [b, a];
-    return { start, end, line: s.mode === "vline" };
+    return { start, end, line: s.mode === "visual-line" };
   };
   const deleteVisual = () => {
     const s = sRef.current;
@@ -366,8 +361,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     cb.current.onMessage("yanked");
   };
 
-  // -------- Ex commands --------
-  const runExCommand = (raw) => {
+  const runExCommand = (raw: string) => {
     const s = sRef.current;
     const cmd = raw.trim();
     if (!cmd) return;
@@ -376,13 +370,13 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       s.flags.saved = true;
       cb.current.onMessage(
         `"lesson.txt" ${s.buffer.length}L, ${s.buffer.reduce((a, l) => a + l.length, 0)}B written`,
-        "ok"
+        "success"
       );
       return;
     }
     if (cmd === "q" || cmd === "quit") {
       if (s.modified) {
-        cb.current.onMessage("E37: No write since last change", "err");
+        cb.current.onMessage("E37: No write since last change", "error");
         return;
       }
       cb.current.onMessage("(simulated: would quit Neovim)");
@@ -391,7 +385,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     if (cmd === "wq" || cmd === "x") {
       s.modified = false;
       s.flags.saved = true;
-      cb.current.onMessage("written & quit (simulated)", "ok");
+      cb.current.onMessage("written & quit (simulated)", "success");
       return;
     }
     if (cmd === "q!") {
@@ -416,17 +410,17 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       const re = new RegExp(pat, flags.includes("g") ? "g" : "");
       pushHistory();
       let count = 0;
-      const apply = (line) => line.replace(re, () => (count++, rep));
+      const apply = (line: string) => line.replace(re, () => (count++, rep));
       if (whole) s.buffer = s.buffer.map(apply);
       else s.buffer[s.cursor[0]] = apply(s.buffer[s.cursor[0]]);
-      cb.current.onMessage(`${count} substitution${count === 1 ? "" : "s"}`, "ok");
+      cb.current.onMessage(`${count} substitution${count === 1 ? "" : "s"}`, "success");
       s.modified = true;
       return;
     }
-    cb.current.onMessage(`E492: Not an editor command: ${cmd}`, "err");
+    cb.current.onMessage(`E492: Not an editor command: ${cmd}`, "error");
   };
 
-  const runSearch = (pat, back = false) => {
+  const runSearch = (pat: string, back = false) => {
     const s = sRef.current;
     if (!pat) return;
     s.lastSearch = pat;
@@ -441,11 +435,10 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
     }
-    cb.current.onMessage(`E486: Pattern not found: ${pat}`, "err");
+    cb.current.onMessage(`E486: Pattern not found: ${pat}`, "error");
   };
 
-  // -------- Leader sequences --------
-  const handleLeader = (key) => {
+  const handleLeader = (key: string) => {
     const s = sRef.current;
     if (s.keyBuf === "") {
       s.keyBuf = " ";
@@ -461,15 +454,15 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       s.theme = (s.theme + 1) % THEMES.length;
       const t = THEMES[s.theme];
       document.documentElement.style.setProperty("--bg", t.bg);
-      document.documentElement.style.setProperty("--accent", t.acc);
+      document.documentElement.style.setProperty("--accent", t.accent);
       s.flags.chadThemeCycled = true;
-      cb.current.onMessage(`◌ theme: ${t.name}`, "ok");
+      cb.current.onMessage(`◌ theme: ${t.name}`, "success");
       s.keyBuf = "";
       return;
     }
     if (seq === " ff") {
       s.flags.telescopeOpened = true;
-      cb.current.onMessage("◌ Telescope find_files ─── (simulated)", "ok");
+      cb.current.onMessage("◌ Telescope find_files ─── (simulated)", "success");
       cb.current.onMessage("    ├ lua/chadrc.lua");
       cb.current.onMessage("    ├ lua/plugins/init.lua");
       cb.current.onMessage("    └ lua/mappings.lua");
@@ -477,36 +470,36 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       return;
     }
     if (seq === " fw") {
-      cb.current.onMessage("◌ Telescope live_grep (simulated)", "ok");
+      cb.current.onMessage("◌ Telescope live_grep (simulated)", "success");
       s.keyBuf = "";
       return;
     }
     if (seq === " fb") {
-      cb.current.onMessage("◌ Telescope buffers (simulated)", "ok");
+      cb.current.onMessage("◌ Telescope buffers (simulated)", "success");
       s.keyBuf = "";
       return;
     }
     if (seq === " e") {
       s.flags.nvimTreeToggled = true;
-      cb.current.onMessage("◌ NvimTree focus (simulated)", "ok");
+      cb.current.onMessage("◌ NvimTree focus (simulated)", "success");
       s.keyBuf = "";
       return;
     }
     if (seq === " h") {
       s.flags.terminalOpened = true;
-      cb.current.onMessage("◌ Horizontal terminal opened (simulated)", "ok");
+      cb.current.onMessage("◌ Horizontal terminal opened (simulated)", "success");
       s.keyBuf = "";
       return;
     }
     if (seq === " v") {
       s.flags.terminalOpened = true;
-      cb.current.onMessage("◌ Vertical terminal opened (simulated)", "ok");
+      cb.current.onMessage("◌ Vertical terminal opened (simulated)", "success");
       s.keyBuf = "";
       return;
     }
     if (seq === " i") {
       s.flags.terminalOpened = true;
-      cb.current.onMessage("◌ Floating terminal opened (simulated)", "ok");
+      cb.current.onMessage("◌ Floating terminal opened (simulated)", "success");
       s.keyBuf = "";
       return;
     }
@@ -540,13 +533,11 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     if (seq.length > 4) s.keyBuf = "";
   };
 
-  // -------- Numeric prefix --------
   const numPrefix = () => {
     const m = sRef.current.keyBuf.match(/\d+/);
     return m ? parseInt(m[0], 10) : 0;
   };
 
-  // -------- Post-action: lesson check --------
   const checkLesson = () => {
     const s = sRef.current;
     const lesson = LESSONS[s.currentLesson];
@@ -562,8 +553,8 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
           JSON.stringify([...nextCompleted])
         );
       } catch {}
-      cb.current.onToast(`✔ Lesson complete: ${lesson.title}`, "ok");
-      cb.current.onMessage(`✔ Completed: ${lesson.title}`, "ok");
+      cb.current.onToast(`✔ Lesson complete: ${lesson.title}`, "success");
+      cb.current.onMessage(`✔ Completed: ${lesson.title}`, "success");
       setTimeout(() => {
         if (s.currentLesson < LESSONS.length - 1) {
           loadLesson(s.currentLesson + 1);
@@ -572,8 +563,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     }
   };
 
-  // -------- Lesson lifecycle --------
-  const loadLesson = useCallback((idx) => {
+  const loadLesson = useCallback((idx: number) => {
     const lesson = LESSONS[idx];
     if (!lesson) return;
     const s = sRef.current;
@@ -606,9 +596,9 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
           JSON.stringify([...nextCompleted])
         );
       } catch {}
-      cb.current.onToast(`✔ ${lesson.title}`, "ok");
+      cb.current.onToast(`✔ ${lesson.title}`, "success");
     } else {
-      cb.current.onToast("Not quite — keep trying!", "err");
+      cb.current.onToast("Not quite — keep trying!", "error");
     }
   }, [completed]);
 
@@ -628,14 +618,12 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     return line.slice(st, en + 1);
   };
 
-  // -------- Key handler --------
   const handleKey = useCallback(
-    (e) => {
+    (e: KeyboardEvent) => {
       if (["Shift", "Control", "Alt", "Meta"].includes(e.key)) return;
       const s = sRef.current;
       cb.current.onKeyLog(e.key);
 
-      // ---- Command mode ----
       if (s.mode === "command") {
         if (e.key === "Escape") {
           s.mode = "normal";
@@ -669,7 +657,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // ---- Insert mode ----
       if (s.mode === "insert") {
         if (e.key === "Escape") {
           s.mode = "normal";
@@ -733,8 +720,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // ---- Visual mode ----
-      if (s.mode === "visual" || s.mode === "vline") {
+      if (s.mode === "visual" || s.mode === "visual-line") {
         if (e.key === "Escape") {
           s.mode = "normal";
           s.visualStart = null;
@@ -773,14 +759,12 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // ---- NORMAL mode ----
       if (e.key === "Escape") {
         s.keyBuf = "";
         rerender();
         return;
       }
 
-      // Ctrl combos
       if (e.ctrlKey && !e.metaKey) {
         const k = e.key.toLowerCase();
         if (k === "r") {
@@ -801,7 +785,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         }
         if (k === "n") {
           s.flags.nvimTreeToggled = true;
-          cb.current.onMessage("◌ NvimTree toggled (simulated)", "ok");
+          cb.current.onMessage("◌ NvimTree toggled (simulated)", "success");
           checkLesson();
           rerender();
           return;
@@ -814,14 +798,13 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // <C-w> prefix continuation
       if (s.keyBuf === "<C-w>") {
         const key = e.key;
         if (key === "v") {
           s.flags.splitVertical = true;
-          cb.current.onMessage("◌ :vsplit (simulated — vertical split opened)", "ok");
+          cb.current.onMessage("◌ :vsplit (simulated — vertical split opened)", "success");
         } else if (key === "s") {
-          cb.current.onMessage("◌ :split (simulated — horizontal split opened)", "ok");
+          cb.current.onMessage("◌ :split (simulated — horizontal split opened)", "info");
         } else if (["h", "j", "k", "l", "q"].includes(key)) {
           cb.current.onMessage(`◌ window move: ${key}`);
         }
@@ -846,7 +829,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // g-prefix
       if (s.keyBuf === "g") {
         if (e.key === "g") {
           motionGG();
@@ -884,7 +866,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // Operator pending
       if (s.keyBuf === "d") {
         if (e.key === "d") {
           deleteLine(numPrefix() || 1);
@@ -963,7 +944,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
         return;
       }
 
-      // Count digits
       if (/^\d$/.test(e.key) && !(e.key === "0" && s.keyBuf === "")) {
         s.keyBuf += e.key;
         rerender();
@@ -1071,7 +1051,7 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
           s.visualStart = [...s.cursor];
           break;
         case "V":
-          s.mode = "vline";
+          s.mode = "visual-line";
           s.visualStart = [...s.cursor];
           break;
         case "/":
@@ -1124,7 +1104,6 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     [completed, loadLesson, rerender]
   );
 
-  // -------- Snapshot for render (fresh each render) --------
   const state = {
     mode: sRef.current.mode,
     buffer: sRef.current.buffer,

@@ -1,7 +1,15 @@
+import type { Mode } from "../types";
+
 const CHAR_W = 8.4;
 const LINE_H = 21;
 
-export default function Cursor({ row, col, mode }) {
+interface Props {
+  row: number;
+  col: number;
+  mode: Mode;
+}
+
+export default function Cursor({ row, col, mode }: Props) {
   const top = 12 + row * LINE_H;
   const left = 14 + col * CHAR_W;
   let cls = "cursor ";

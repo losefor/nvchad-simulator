@@ -1,13 +1,21 @@
-const MODES = {
+import type { Mode } from "../types";
+
+const MODES: Record<string, { label: string; cls: string }> = {
   normal: { label: "NORMAL", cls: "mode-normal" },
   insert: { label: "INSERT", cls: "mode-insert" },
   visual: { label: "VISUAL", cls: "mode-visual" },
-  vline: { label: "V-LINE", cls: "mode-vline" },
+  "visual-line": { label: "V-LINE", cls: "mode-vline" },
   command: { label: "COMMAND", cls: "mode-command" },
   replace: { label: "REPLACE", cls: "mode-replace" }
 };
 
-export default function Statusline({ mode, cursor, keyBuf }) {
+interface Props {
+  mode: Mode;
+  cursor: [number, number];
+  keyBuf: string;
+}
+
+export default function Statusline({ mode, cursor, keyBuf }: Props) {
   const m = MODES[mode] || MODES.normal;
   return (
     <div className="statusline">

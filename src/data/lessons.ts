@@ -1,14 +1,6 @@
-/* ============================================================
-   NvChad Interactive Course — Comprehensive lesson definitions
-   Covers all default NvChad mappings + Neovim fundamentals
-   Organized into: BEGINNER / MEDIUM / ADVANCED / GRADUATION
-   ============================================================ */
+import type { Lesson, Theme, CheatsheetGroup } from "../types";
 
-export const LESSONS = [
-  // ═══════════════════════════════════════════════════════════
-  // ░░░ BEGINNER ░░░
-  // ═══════════════════════════════════════════════════════════
-
+export const LESSONS: Lesson[] = [
   {
     id: "b-welcome",
     title: "Welcome to NvChad",
@@ -334,11 +326,6 @@ export const LESSONS = [
     ],
     check: (s) => s.cursor[0] === 0 && s.cursor[1] === s.buffer[0].length - 1
   },
-
-  // ═══════════════════════════════════════════════════════════
-  // ░░░ MEDIUM ░░░
-  // ═══════════════════════════════════════════════════════════
-
   {
     id: "m-word-motions",
     title: "Word Motions: w b e",
@@ -737,11 +724,6 @@ export const LESSONS = [
     ],
     check: (s) => s.flags.splitVertical
   },
-
-  // ═══════════════════════════════════════════════════════════
-  // ░░░ ADVANCED ░░░
-  // ═══════════════════════════════════════════════════════════
-
   {
     id: "a-window-switch",
     title: "NvChad: Window Navigation with Ctrl+hjkl",
@@ -1333,11 +1315,6 @@ export const LESSONS = [
     ],
     check: (s) => s.cursor[0] >= 3
   },
-
-  // ═══════════════════════════════════════════════════════════
-  // GRADUATION
-  // ═══════════════════════════════════════════════════════════
-
   {
     id: "graduation",
     title: "🎓 Graduation: Master of NvChad",
@@ -1369,7 +1346,7 @@ export const LESSONS = [
   }
 ];
 
-export const CHEATSHEET = [
+export const CHEATSHEET: CheatsheetGroup[] = [
   {
     group: "Motions",
     items: [
@@ -1510,10 +1487,10 @@ export const CHEATSHEET = [
   }
 ];
 
-export const THEMES = [
-  { name: "onedark", bg: "#1e222a", acc: "#61afef" },
-  { name: "chadracula", bg: "#282a36", acc: "#bd93f9" },
-  { name: "gruvchad", bg: "#282828", acc: "#d79921" },
-  { name: "tokyonight", bg: "#1a1b26", acc: "#7aa2f7" },
-  { name: "catppuccin", bg: "#1e1e2e", acc: "#cba6f7" }
+export const THEMES: Theme[] = [
+  { name: "onedark", bg: "#1e222a", accent: "#61afef", fg: "#abb2bf", green: "#98c379", red: "#e06c75", blue: "#61afef" },
+  { name: "chadracula", bg: "#282a36", accent: "#bd93f9", fg: "#f8f8f2", green: "#50fa7b", red: "#ff5555", blue: "#bd93f9" },
+  { name: "gruvchad", bg: "#282828", accent: "#d79921", fg: "#ebdbb2", green: "#b8bb26", red: "#fb4934", blue: "#83a598" },
+  { name: "tokyonight", bg: "#1a1b26", accent: "#7aa2f7", fg: "#c0caf5", green: "#9ece6a", red: "#f7768e", blue: "#7aa2f7" },
+  { name: "catppuccin", bg: "#1e1e2e", accent: "#cba6f7", fg: "#cdd6f4", green: "#a6e3a1", red: "#f38ba8", blue: "#89b4fa" }
 ];

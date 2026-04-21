@@ -1,33 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
-import { LESSONS } from "./data/lessons.js";
-import { useSimulator } from "./hooks/useSimulator.js";
-import Sidebar from "./components/Sidebar.jsx";
-import Editor from "./components/Editor.jsx";
-import Console from "./components/Console.jsx";
-import Cheatsheet from "./components/Cheatsheet.jsx";
-import Toast from "./components/Toast.jsx";
+import { LESSONS } from "./data/lessons";
+import { useSimulator } from "./hooks/useSimulator";
+import type { Message, KeyLogEntry, Toast } from "./types";
+import Sidebar from "./components/Sidebar";
+import Editor from "./components/Editor";
+import Console from "./components/Console";
+import Cheatsheet from "./components/Cheatsheet";
+import Toast from "./components/Toast";
 
 export default function App() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     { text: "─── NvChad Simulator booted ───", kind: "info" }
   ]);
-  const [keyLog, setKeyLog] = useState([]);
-  const [toast, setToast] = useState(null);
+  const [keyLog, setKeyLog] = useState<KeyLogEntry[]>([]);
+  const [toast, setToast] = useState<Toast | null>(null);
   const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
 
-  const onToast = useCallback((text, kind) => {
+  const onToast = useCallback((text: string, kind: Message["kind"]) => {
     setToast({ text, kind });
     setTimeout(() => setToast(null), 1800);
   }, []);
 
-  const onMessage = useCallback((text, kind = "info") => {
+  const onMessage = useCallback((text: string, kind: Message["kind"] = "info") => {
     setMessages((prev) => {
       const next = [...prev, { text, kind }];
       return next.length > 200 ? next.slice(-200) : next;
     });
   }, []);
 
-  const onKeyLog = useCallback((key) => {
+  const onKeyLog = useCallback((key: string) => {
     const time = new Date().toLocaleTimeString("en-GB", { hour12: false });
     setKeyLog((prev) => {
       const next = [...prev, { key, time }];
@@ -46,10 +47,9 @@ export default function App() {
     skipLesson
   } = useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested });
 
-  // Global keydown listener
   useEffect(() => {
-    const listener = (e) => {
-      const target = e.target;
+    const listener = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
       const blocked = ["Tab", " ", "/", "?", ":", "'"];
       if (blocked.includes(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
@@ -66,15 +66,12 @@ export default function App() {
     return () => window.removeEventListener("keydown", listener);
   }, [handleKey, state.mode]);
 
-  // Load lesson 0 on mount
   useEffect(() => {
     loadLesson(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentLesson = LESSONS[state.currentLesson];
 
-  // Reset messages when lesson changes
   useEffect(() => {
     setMessages([
       {

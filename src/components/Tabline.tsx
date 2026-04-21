@@ -1,4 +1,8 @@
-export default function Tabline({ modified }) {
+interface Props {
+  modified: boolean;
+}
+
+export default function Tabline({ modified }: Props) {
   return (
     <div className="tabline">
       <div className="tab active">

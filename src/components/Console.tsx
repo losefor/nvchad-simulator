@@ -1,6 +1,11 @@
 import { useState } from "react";
+import type { Lesson, Message, KeyLogEntry } from "../types";
 
-function HintsPane({ lesson }) {
+interface HintsPaneProps {
+  lesson: Lesson;
+}
+
+function HintsPane({ lesson }: HintsPaneProps) {
   return (
     <div className="ctab-pane active">
       <div className="hint-title">Hints</div>
@@ -13,7 +18,11 @@ function HintsPane({ lesson }) {
   );
 }
 
-function KeyLogPane({ entries }) {
+interface KeyLogPaneProps {
+  entries: KeyLogEntry[];
+}
+
+function KeyLogPane({ entries }: KeyLogPaneProps) {
   return (
     <div className="ctab-pane active">
       {entries.map((k, i) => (
@@ -25,7 +34,11 @@ function KeyLogPane({ entries }) {
   );
 }
 
-function MessagesPane({ messages }) {
+interface MessagesPaneProps {
+  messages: Message[];
+}
+
+function MessagesPane({ messages }: MessagesPaneProps) {
   return (
     <div className="ctab-pane active">
       {messages.map((m, i) => (
@@ -35,13 +48,21 @@ function MessagesPane({ messages }) {
   );
 }
 
+interface Props {
+  lesson: Lesson;
+  messages: Message[];
+  keyLog: KeyLogEntry[];
+  onCheck: () => void;
+  onSkip: () => void;
+}
+
 export default function Console({
   lesson,
   messages,
   keyLog,
   onCheck,
   onSkip
-}) {
+}: Props) {
   const [tab, setTab] = useState("hints");
 
   return (

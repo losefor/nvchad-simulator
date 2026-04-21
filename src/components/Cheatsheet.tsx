@@ -1,9 +1,14 @@
-import { CHEATSHEET } from "../data/lessons.js";
+import { CHEATSHEET } from "../data/lessons";
 
-export default function Cheatsheet({ open, onClose }) {
+interface Props {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function Cheatsheet({ open, onClose }: Props) {
   if (!open) return null;
 
-  const handleBackdrop = (e) => {
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
 

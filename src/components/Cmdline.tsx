@@ -1,4 +1,10 @@
-export default function Cmdline({ active, prefix, text }) {
+interface Props {
+  active: boolean;
+  prefix: string;
+  text: string;
+}
+
+export default function Cmdline({ active, prefix, text }: Props) {
   if (!active) return null;
   return (
     <div className="cmdline">

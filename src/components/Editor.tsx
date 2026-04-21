@@ -1,11 +1,36 @@
-import Tabline from "./Tabline.jsx";
-import LessonHeader from "./LessonHeader.jsx";
-import Gutter from "./Gutter.jsx";
-import Buffer from "./Buffer.jsx";
-import Statusline from "./Statusline.jsx";
-import Cmdline from "./Cmdline.jsx";
+import type { Lesson, Mode } from "../types";
+import Tabline from "./Tabline";
+import LessonHeader from "./LessonHeader";
+import Gutter from "./Gutter";
+import Buffer from "./Buffer";
+import Statusline from "./Statusline";
+import Cmdline from "./Cmdline";
 
-export default function Editor({ state, lesson }) {
+interface VisualRange {
+  start: [number, number];
+  end: [number, number];
+  line: boolean;
+}
+
+interface EditorState {
+  mode: Mode;
+  buffer: string[];
+  cursor: [number, number];
+  keyBuf: string;
+  cmdText: string;
+  cmdPrefix: string;
+  modified: boolean;
+  currentLesson: number;
+  visualStart: [number, number] | null;
+  visualRange: VisualRange | null;
+}
+
+interface Props {
+  state: EditorState;
+  lesson: Lesson;
+}
+
+export default function Editor({ state, lesson }: Props) {
   return (
     <div className="main">
       <header className="topbar">
