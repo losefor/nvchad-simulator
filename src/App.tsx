@@ -23,6 +23,7 @@ export default function App() {
   ]);
   const [keyLog, setKeyLog] = useState<KeyLogEntry[]>([]);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
   const [telescopeOpen, setTelescopeOpen] = useState<{ type: "files" | "grep" | "buffers" } | null>(null);
   const [nvimTreeOpen, setNvimTreeOpen] = useState(false);
@@ -139,7 +140,14 @@ export default function App() {
   }, [loadLesson, state.currentLesson]);
 
   return (
-    <div className={"app" + (nvimTreeOpen ? " nvimtree-open" : "")}>
+    <div className={["app", nvimTreeOpen && "nvimtree-open", !sidebarOpen && "sidebar-closed"].filter(Boolean).join(" ")}>
+      <button
+        className="sidebar-toggle"
+        onClick={() => setSidebarOpen(o => !o)}
+        title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+      >
+        {sidebarOpen ? "‹" : "›"}
+      </button>
       <Sidebar
         currentLesson={state.currentLesson}
         completed={completed}
