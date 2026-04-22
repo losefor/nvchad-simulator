@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { VFS } from "../vfs";
 import {
   createInitialVFS, getNode, setNode, deleteNode,
@@ -39,8 +39,22 @@ function tokenize(raw: string): string[] {
   return tokens;
 }
 
+const VFS_KEY = "nvim-sim-vfs";
+
+function loadVFS(): VFS {
+  try {
+    const raw = localStorage.getItem(VFS_KEY);
+    if (raw) return JSON.parse(raw) as VFS;
+  } catch {}
+  return createInitialVFS();
+}
+
 export function useVFS() {
-  const [vfs, setVFS] = useState<VFS>(createInitialVFS);
+  const [vfs, setVFS] = useState<VFS>(loadVFS);
+
+  useEffect(() => {
+    try { localStorage.setItem(VFS_KEY, JSON.stringify(vfs)); } catch {}
+  }, [vfs]);
 
   const runCommand = useCallback((raw: string, currentVFS: VFS): CommandResult => {
     const trimmed = raw.trim();
