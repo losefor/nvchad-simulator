@@ -1,16 +1,10 @@
-import type { Lesson, Mode } from "../types";
+import type { Lesson, Mode, VisualRange } from "../types";
 import Tabline from "./Tabline";
 import LessonHeader from "./LessonHeader";
 import Gutter from "./Gutter";
 import Buffer from "./Buffer";
 import Statusline from "./Statusline";
 import Cmdline from "./Cmdline";
-
-interface VisualRange {
-  start: [number, number];
-  end: [number, number];
-  line: boolean;
-}
 
 interface EditorState {
   mode: Mode;
@@ -28,14 +22,21 @@ interface EditorState {
 interface Props {
   state: EditorState;
   lesson: Lesson;
+  vfsFilename?: string;
 }
 
-export default function Editor({ state, lesson }: Props) {
+export default function Editor({ state, lesson, vfsFilename }: Props) {
   return (
     <div className="main">
       <header className="topbar">
-        <Tabline modified={state.modified} />
-        <LessonHeader index={state.currentLesson} lesson={lesson} />
+        <Tabline modified={state.modified} filename={vfsFilename} />
+        {!vfsFilename && <LessonHeader index={state.currentLesson} lesson={lesson} />}
+        {vfsFilename && (
+          <div className="vfs-header">
+            <span className="vfs-path">{vfsFilename}</span>
+            <span className="vfs-hint">:w to save · Esc for normal mode · Ctrl-n for NvimTree</span>
+          </div>
+        )}
       </header>
 
       <section className="editor-wrap">
