@@ -1,1002 +1,469 @@
-/* NvChad-inspired theme (onedark/chadracula flavour) */
-:root {
-  --bg: #1e222a;
-  --bg-alt: #1a1c23;
-  --bg-darker: #16181e;
-  --bg-sidebar: #181b20;
-  --bg-float: #232731;
-  --bg-statusline: #22262e;
-  --fg: #abb2bf;
-  --fg-dim: #5c6370;
-  --fg-bright: #d7dae0;
-  --border: #2a2e37;
-  --blue: #61afef;
-  --cyan: #56b6c2;
-  --green: #98c379;
-  --yellow: #e5c07b;
-  --orange: #d19a66;
-  --red: #e06c75;
-  --purple: #c678dd;
-  --pink: #ff75a0;
-  --accent: #7aa2f7;
-  --accent-2: #bb9af7;
-  --nvim-green: #87c095;
-  --cursor: #f4c08d;
-  --selection: rgba(97,175,239,0.25);
-  --bg-sel: rgba(97,175,239,0.15);
-  --shadow: 0 8px 24px rgba(0,0,0,0.35);
-  --radius: 8px;
-  --mono: "JetBrainsMono Nerd Font", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+@import "tailwindcss";
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html,
+  body,
+  #root {
+    @apply m-0 p-0 h-full;
+  }
+
+  body {
+    @apply bg-nvim-bg text-nvim-fg font-sans text-lg overflow-hidden;
+  }
+
+  button {
+    @apply font-inherit cursor-pointer;
+  }
+
+  input,
+  textarea {
+    @apply font-inherit;
+  }
 }
 
-* { box-sizing: border-box; }
-html, body, #root { margin: 0; padding: 0; height: 100%; }
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--sans);
-  overflow: hidden;
-  font-size: 14px;
-}
+@layer components {
+  /* Layout */
+  .app {
+    @apply grid grid-cols-[260px_1fr] h-screen w-screen transition-[grid-template-columns] duration-220;
+  }
 
-button { font-family: inherit; cursor: pointer; }
+  .app.nvimtree-open {
+    @apply grid-cols-[260px_200px_1fr];
+  }
 
-/* ---------------- Layout ---------------- */
-.app {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  height: 100vh;
-  width: 100vw;
-  transition: grid-template-columns 0.22s ease;
-}
-.app.nvimtree-open {
-  grid-template-columns: 260px 200px 1fr;
-}
-.app.sidebar-closed {
-  grid-template-columns: 0 1fr;
-}
-.app.sidebar-closed.nvimtree-open {
-  grid-template-columns: 0 200px 1fr;
-}
+  .app.sidebar-closed {
+    @apply grid-cols-[0_1fr];
+  }
 
-.sidebar-toggle {
-  position: fixed;
-  left: 260px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 300;
-  width: 14px;
-  height: 44px;
-  background: var(--bg-sidebar);
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  color: var(--fg-muted);
-  cursor: pointer;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: left 0.22s ease;
-}
-.sidebar-toggle:hover { color: var(--fg); background: var(--bg-active); }
-.app.sidebar-closed .sidebar-toggle {
-  left: 0;
-  border-left: 1px solid var(--border);
-  border-right: none;
-  border-radius: 6px 0 0 6px;
-}
+  .app.sidebar-closed.nvimtree-open {
+    @apply grid-cols-[0_200px_1fr];
+  }
 
-.main-col {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  overflow: hidden;
-  min-height: 0;
-}
+  .sidebar-toggle {
+    @apply fixed left-[260px] top-1/2 -translate-y-1/2 z-300 w-[14px] h-11
+      bg-nvim-bg-sidebar border border-nvim-border border-l-0 rounded-r-md
+      text-nvim-fg-dim cursor-pointer text-xs flex items-center justify-center
+      p-0 transition-left duration-220;
+  }
 
-/* ---------------- Sidebar ---------------- */
-.sidebar {
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+  .sidebar-toggle:hover {
+    @apply text-nvim-fg-bright bg-nvim-bg-float;
+  }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 16px 14px;
-  border-bottom: 1px solid var(--border);
-}
-.brand-logo {
-  width: 32px; height: 32px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-radius: 8px;
-  display: grid; place-items: center;
-  color: #1e222a; font-weight: 700;
-  font-family: var(--mono);
-}
-.brand-title { font-weight: 700; color: var(--fg-bright); font-size: 15px; }
-.brand-sub { font-size: 11px; color: var(--fg-dim); }
-.brand-github {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  background: var(--bg-active);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--fg-dim);
-  text-decoration: none;
-  font-size: 11px;
-  transition: color .15s, border-color .15s;
-  white-space: nowrap;
-}
-.brand-github:hover { color: var(--fg-bright); border-color: var(--fg-dim); }
-.brand-github-icon { width: 14px; height: 14px; flex-shrink: 0; }
-.brand-github-stars { font-weight: 600; color: var(--accent); letter-spacing: .3px; }
+  .app.sidebar-closed .sidebar-toggle {
+    @apply left-0 border-l border-r-0 rounded-l-md;
+  }
 
-.progress-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--fg-dim); margin-bottom: 6px; }
-.progress-bar { height: 6px; background: var(--bg-darker); border-radius: 3px; overflow: hidden; }
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--green), var(--nvim-green));
-  transition: width .3s ease;
-}
+  .main-col {
+    @apply grid grid-rows-[1fr_auto] overflow-hidden;
+  }
 
-.lesson-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 0;
-}
-.lesson-section-title {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--fg-dim);
-  padding: 12px 16px 6px;
-  font-weight: 600;
-}
-.lesson-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  cursor: pointer;
-  border-left: 2px solid transparent;
-  font-size: 13px;
-  color: var(--fg);
-  transition: background .15s, border-color .15s;
-}
-.lesson-item:hover { background: rgba(255,255,255,0.03); }
-.lesson-item.active {
-  background: rgba(122,162,247,0.08);
-  border-left-color: var(--accent);
-  color: var(--fg-bright);
-}
-.lesson-item .num {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--fg-dim);
-  min-width: 22px;
-}
-.lesson-item.done .num::after { content: " ✓"; color: var(--green); }
-.lesson-item.done { opacity: 0.72; }
-.lesson-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Sidebar */
+  .sidebar {
+    @apply bg-nvim-bg-sidebar border-r border-nvim-border flex flex-col overflow-hidden;
+  }
 
-.sidebar-footer {
-  padding: 10px 12px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 8px;
-}
+  .brand {
+    @apply flex items-center gap-2.5 px-4 pb-3.5 pt-4 border-b border-nvim-border;
+  }
 
-.btn-ghost, .btn-primary {
-  background: transparent;
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  transition: background .15s, border-color .15s, color .15s;
-}
-.btn-ghost:hover { background: var(--bg-float); color: var(--fg-bright); }
-.btn-primary {
-  background: var(--accent);
-  color: #16181e;
-  border-color: var(--accent);
-  font-weight: 600;
-}
-.btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .brand-logo {
+    @apply w-8 h-8 bg-gradient-to-br from-nvim-accent to-nvim-accent-2
+      rounded-lg grid place-items-center text-nvim-bg font-bold font-mono text-sm;
+  }
 
-/* ---------------- Main (editor column) ---------------- */
-.main {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
-  background: var(--bg);
-  min-height: 0;
-}
-.topbar { background: var(--bg-alt); border-bottom: 1px solid var(--border); }
+  .brand-text {
+    @apply flex flex-col;
+  }
 
-.tabline {
-  display: flex;
-  align-items: center;
-  background: var(--bg-darker);
-  border-bottom: 1px solid var(--border);
-  padding: 0 6px;
-  height: 34px;
-  font-size: 12px;
-}
-.tab {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px 6px 0 0;
-  color: var(--fg);
-  background: var(--bg-alt);
-  margin: 4px 2px 0;
-  border: 1px solid var(--border);
-  border-bottom: none;
-  position: relative; top: 1px;
-}
-.tab.dim { color: var(--fg-dim); background: transparent; border-color: transparent; }
-.tab.active { background: var(--bg); color: var(--fg-bright); }
-.tab-icon { color: var(--blue); font-family: var(--mono); }
-.tab-mod { color: var(--green); font-size: 10px; opacity: 0; transition: opacity .15s; }
-.tab-mod.show { opacity: 1; }
-.tab-spacer { flex: 1; }
-.tab-info { color: var(--fg-dim); font-family: var(--mono); padding: 0 10px; }
+  .brand-title {
+    @apply font-bold text-nvim-fg-bright text-xl;
+  }
 
-.lesson-header {
-  padding: 14px 22px 16px;
-}
-.lesson-title-row {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 4px;
-}
-.lesson-number {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--fg-dim);
-  background: var(--bg-float);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-.lesson-title {
-  margin: 0; font-size: 18px; color: var(--fg-bright); font-weight: 600;
-}
-.lesson-badge {
-  font-size: 10px;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(152,195,121,0.15);
-  color: var(--green);
-  letter-spacing: 0.5px;
-}
-.lesson-badge.chad { background: rgba(198,120,221,0.15); color: var(--purple); }
-.lesson-badge.motion { background: rgba(97,175,239,0.15); color: var(--blue); }
-.lesson-badge.edit { background: rgba(229,192,123,0.15); color: var(--yellow); }
-.lesson-badge.search { background: rgba(224,108,117,0.15); color: var(--red); }
-.lesson-badge.visual { background: rgba(86,182,194,0.15); color: var(--cyan); }
-.lesson-badge.window { background: rgba(209,154,102,0.15); color: var(--orange); }
+  .brand-sub {
+    @apply text-xs text-nvim-fg-dim;
+  }
 
-.lesson-desc { margin: 4px 0 10px; color: var(--fg); font-size: 13px; line-height: 1.5; }
+  .brand-github {
+    @apply ml-auto flex items-center gap-1.5 px-2 py-1 bg-nvim-bg-float
+      border border-nvim-border rounded-md text-nvim-fg-dim text-xs
+      hover:text-nvim-fg-bright hover:border-nvim-fg-dim transition-colors duration-150
+      whitespace-nowrap no-underline;
+  }
 
-.lesson-task {
-  background: var(--bg-float);
-  border-left: 3px solid var(--accent);
-  padding: 10px 14px;
-  border-radius: 0 6px 6px 0;
-  font-size: 13px;
-  color: var(--fg-bright);
-}
-.lesson-task strong { color: var(--accent); }
-.lesson-task code {
-  background: var(--bg-darker);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-family: var(--mono);
-  color: var(--yellow);
-  font-size: 12px;
-}
+  .brand-github-icon {
+    @apply w-3.5 h-3.5 flex-shrink-0;
+  }
 
-/* ---------------- Editor ---------------- */
-.editor-wrap {
-  position: relative;
-  display: grid;
-  grid-template-rows: 1fr auto auto;
-  overflow: hidden;
-  min-height: 0;
-}
+  .brand-github-stars {
+    @apply font-semibold text-nvim-accent tracking-wider;
+  }
 
-.editor {
-  display: grid;
-  grid-template-columns: 56px 1fr;
-  background: var(--bg);
-  overflow: hidden;
-  font-family: var(--mono);
-  font-size: 14px;
-  line-height: 1.5;
-  min-height: 0;
-}
+  .progress-bar {
+    @apply px-4 py-2 border-b border-nvim-border text-xs text-nvim-fg-dim;
+  }
 
-.gutter {
-  background: var(--bg);
-  color: var(--fg-dim);
-  text-align: right;
-  padding: 12px 10px 12px 6px;
-  user-select: none;
-  font-variant-numeric: tabular-nums;
-  overflow: hidden;
-}
-.gutter-line { height: 21px; }
-.gutter-line.current { color: var(--yellow); font-weight: 600; }
+  .progress-bar-text {
+    @apply text-nvim-fg;
+  }
 
-.buffer-wrap {
-  position: relative;
-  overflow: auto;
-  padding: 12px 14px;
-}
-.buffer {
-  white-space: pre;
-  min-height: 100%;
-  tab-size: 4;
-  -moz-tab-size: 4;
-}
-.buffer .ln { height: 21px; display: block; }
-.buffer .ln.current-line { background: rgba(255,255,255,0.03); }
-.buffer .sel { background: var(--selection); }
+  .mode-toggle {
+    @apply flex gap-2 px-3 py-2;
+  }
 
-/* Cursor */
-.cursor {
-  position: absolute;
-  width: 8.4px;
-  height: 21px;
-  background: var(--cursor);
-  opacity: 0.85;
-  pointer-events: none;
-  transition: left .03s linear, top .03s linear;
-  z-index: 2;
-}
-.cursor-block { width: 8.4px; }
-.cursor-bar { width: 2px !important; }
-.cursor-hidden { display: none; }
+  .mode-btn {
+    @apply flex-1 px-3 py-1.5 rounded-lg border border-nvim-border
+      text-nvim-fg-dim text-xs font-medium cursor-pointer bg-transparent
+      hover:border-nvim-border transition-colors duration-150;
+  }
 
-/* ---------------- Statusline ---------------- */
-.statusline {
-  background: var(--bg-statusline);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  font-family: var(--mono);
-  font-size: 12px;
-  height: 26px;
-  color: var(--fg);
-}
-.mode-indicator {
-  padding: 0 14px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  height: 100%;
-  display: inline-flex;
-  align-items: center;
-  color: #16181e;
-}
-.mode-normal { background: var(--green); }
-.mode-insert { background: var(--blue); }
-.mode-visual { background: var(--purple); }
-.mode-vline { background: var(--pink); }
-.mode-command { background: var(--yellow); }
-.mode-replace { background: var(--red); }
+  .mode-btn.mode-active {
+    @apply bg-nvim-accent text-nvim-bg border-nvim-accent;
+  }
 
-.file-indicator {
-  padding: 0 12px;
-  background: var(--bg-float);
-  height: 100%;
-  display: inline-flex;
-  align-items: center;
-  color: var(--fg-bright);
-}
-.status-spacer { flex: 1; }
-.keys-buffer {
-  color: var(--yellow);
-  padding: 0 10px;
-  font-weight: 600;
-}
-.lint-indicator { padding: 0 10px; color: var(--fg-dim); }
-.pos-indicator, .percent-indicator {
-  padding: 0 10px;
-  background: var(--bg-float);
-  height: 100%;
-  display: inline-flex;
-  align-items: center;
-}
-.percent-indicator { background: var(--accent); color: #16181e; font-weight: 700; }
+  /* Lesson Path */
+  .lesson-path {
+    @apply flex-1 overflow-y-auto px-4 py-4;
+  }
 
-/* ---------------- Command line ---------------- */
-.cmdline {
-  font-family: var(--mono);
-  font-size: 13px;
-  background: var(--bg-alt);
-  padding: 4px 12px;
-  border-top: 1px solid var(--border);
-  min-height: 24px;
-  color: var(--fg-bright);
-}
-.cmd-cursor { animation: blink 1s steps(2) infinite; color: var(--cursor); }
-@keyframes blink { 50% { opacity: 0; } }
+  .lp-section {
+    @apply w-full flex flex-col items-center mb-2;
+  }
 
-/* ---------------- Console / Hints ---------------- */
-.console {
-  background: var(--bg-alt);
-  border-top: 1px solid var(--border);
-  max-height: 36vh;
-  min-height: 150px;
-  display: flex;
-  flex-direction: column;
-}
-.console-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--border);
-}
-.console-tabs { display: flex; gap: 4px; }
-.ctab {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--fg-dim);
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
-}
-.ctab:hover { color: var(--fg-bright); }
-.ctab.active {
-  color: var(--accent);
-  background: rgba(122,162,247,0.08);
-  border-color: rgba(122,162,247,0.2);
-}
-.console-actions { display: flex; gap: 6px; }
+  .lp-section-banner {
+    @apply w-full py-1.5 px-3 rounded-lg text-xs font-bold text-center mb-3;
+  }
 
-.console-body {
-  flex: 1; overflow: auto; padding: 10px 14px;
-  font-size: 13px;
-  font-family: var(--mono);
-}
-.ctab-pane ul { margin: 0; padding-left: 18px; }
-.ctab-pane li { margin-bottom: 4px; color: var(--fg); }
-.ctab-pane code {
-  background: var(--bg-darker);
-  padding: 1px 6px;
-  border-radius: 4px;
-  color: var(--yellow);
-}
-.ctab-pane .hint-title { color: var(--accent); font-weight: 600; margin-bottom: 6px; }
-.key-log-line { color: var(--fg-dim); }
-.key-log-line .ch { color: var(--yellow); }
-.msg { margin-bottom: 3px; }
-.msg.info { color: var(--fg); }
-.msg.ok { color: var(--green); }
-.msg.warn { color: var(--yellow); }
-.msg.err { color: var(--red); }
+  .lp-section-label {
+    @apply tracking-widest;
+  }
 
-/* ---------------- Cheatsheet modal ---------------- */
-.modal {
-  position: fixed; inset: 0;
-  background: rgba(10,12,16,0.6);
-  display: grid; place-items: center;
-  z-index: 20;
-  backdrop-filter: blur(3px);
-}
-.modal-card {
-  width: min(900px, 92vw);
-  max-height: 80vh;
-  background: var(--bg-float);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-.modal-head {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-head h2 { margin: 0; font-size: 16px; color: var(--fg-bright); }
-.modal-body { padding: 16px 18px; overflow: auto; }
+  .lp-node-row {
+    @apply flex flex-col items-center relative transition-transform duration-150;
+  }
 
-.cheat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-}
-.cheat-group h3 {
-  font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
-  color: var(--accent); margin: 0 0 6px;
-}
-.cheat-group .row {
-  display: flex; justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px dashed var(--border);
-  font-size: 12px;
-}
-.cheat-group .row kbd {
-  font-family: var(--mono);
-  color: var(--yellow);
-  background: var(--bg-darker);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-}
-.cheat-group .row span.desc { color: var(--fg); text-align: right; max-width: 60%; }
+  .lp-connector {
+    @apply block overflow-visible;
+  }
 
-/* ---------------- Toast ---------------- */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-float);
-  border: 1px solid var(--border);
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-size: 13px;
-  box-shadow: var(--shadow);
-  z-index: 30;
-  transition: opacity .2s, transform .2s;
-}
-.toast.ok { border-color: var(--green); color: var(--green); }
-.toast.err { border-color: var(--red); color: var(--red); }
+  .lp-start-badge {
+    @apply bg-nvim-accent text-nvim-bg text-xs font-bold px-2 py-0.5 rounded-full
+      mb-1.5 tracking-wider;
+  }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
+  .lp-node {
+    @apply w-16 h-16 rounded-full border-2 cursor-pointer flex items-center justify-center
+      transition-transform duration-150 disabled:cursor-not-allowed relative;
+    @apply border-nvim-border text-nvim-fg-dim bg-nvim-bg-float;
+  }
 
-.hidden { display: none !important; }
+  .lp-node:not(:disabled):hover {
+    @apply scale-110;
+  }
 
-/* ---------------- Telescope ---------------- */
-.telescope-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.6);
-  z-index: 50;
-  display: flex; align-items: flex-start; justify-content: center;
-  padding-top: 80px;
-}
-.telescope-modal {
-  width: min(680px, 92vw);
-  background: var(--bg-float);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  max-height: 60vh;
-}
-.telescope-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px;
-  background: var(--bg-darker);
-  border-bottom: 1px solid var(--border);
-}
-.telescope-title { color: var(--accent); font-size: 13px; font-weight: 600; }
-.telescope-hint { color: var(--fg-dim); font-size: 11px; }
-.telescope-input-row {
-  display: flex; align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  gap: 6px;
-}
-.telescope-prompt { color: var(--green); font-size: 14px; }
-.telescope-input {
-  flex: 1; background: transparent; border: none; outline: none;
-  color: var(--fg); font-family: var(--mono); font-size: 13px;
-}
-.telescope-results { overflow-y: auto; flex: 1; }
-.telescope-empty { padding: 12px; color: var(--fg-dim); font-size: 13px; text-align: center; }
-.telescope-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 5px 12px; cursor: pointer; font-size: 13px;
-  transition: background .1s;
-}
-.telescope-item:hover { background: var(--bg-sel); }
-.telescope-item-sel { background: var(--bg-sel); }
-.telescope-idx { color: var(--fg-dim); min-width: 20px; font-size: 11px; text-align: right; }
-.telescope-name { color: var(--fg); font-family: var(--mono); }
-.telescope-footer {
-  padding: 4px 12px;
-  background: var(--bg-darker);
-  border-top: 1px solid var(--border);
-  color: var(--fg-dim); font-size: 11px;
-  text-align: right;
-}
+  .lp-node.lp-done {
+    @apply border-nvim-green bg-nvim-green text-nvim-bg;
+  }
 
-/* ---------------- NvimTree ---------------- */
-.nvimtree {
-  width: 200px;
-  min-width: 200px;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  font-size: 13px;
-}
-.nvimtree-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  background: var(--bg-darker);
-  border-bottom: 1px solid var(--border);
-}
-.nvimtree-title { color: var(--accent); font-size: 12px; font-weight: 600; }
-.nvimtree-keys { color: var(--fg-dim); font-size: 10px; margin-left: 6px; flex: 1; }
-.nvimtree-close {
-  background: none; border: none; color: var(--fg-dim); cursor: pointer;
-  font-size: 16px; padding: 0 2px; line-height: 1;
-}
-.nvimtree-close:hover { color: var(--fg-bright); }
-.nvimtree-root-label {
-  padding: 4px 10px;
-  color: var(--fg-dim);
-  font-size: 11px;
-  border-bottom: 1px solid var(--border);
-}
-.nvimtree-body { overflow-y: auto; flex: 1; padding: 4px 0; }
-.nt-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  cursor: pointer;
-  user-select: none;
-  transition: background .1s;
-}
-.nt-item:hover { background: var(--bg-sel); }
-.nt-active { background: var(--bg-sel) !important; color: var(--fg-bright); }
-.nt-cursor { background: var(--accent) !important; color: #1e222a !important; }
-.nt-cursor .nt-icon, .nt-cursor .nt-arrow { color: #1e222a !important; }
-.nt-arrow { color: var(--fg-dim); font-size: 10px; min-width: 10px; }
-.nt-icon { color: var(--blue); font-size: 13px; }
-.nt-dir .nt-icon { color: var(--accent); }
-.nt-name { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lp-node.lp-done .lp-icon {
+    @apply text-nvim-bg text-base font-bold;
+  }
 
-/* ---------------- Terminal ---------------- */
-.terminal {
-  flex-shrink: 0;
-  height: 260px;
-  background: var(--bg-darker);
-  border-top: 2px solid var(--green);
-  display: flex;
-  flex-direction: column;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  overflow: hidden;
-  cursor: text;
-}
-.terminal-titlebar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
-  background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.terminal-label {
-  margin-left: auto;
-  font-size: 10px;
-  color: var(--green);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-.terminal-cwd { color: var(--accent); font-size: 11px; }
-.terminal-close {
-  background: none; border: none; color: var(--fg-dim); cursor: pointer;
-  font-size: 16px; padding: 0 2px; line-height: 1;
-}
-.terminal-close:hover { color: var(--red); }
-.terminal-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 6px 10px;
-}
-.tl { line-height: 1.55; white-space: pre-wrap; word-break: break-all; }
-.tl-input { color: var(--green); }
-.tl-output { color: var(--fg); }
-.tl-error { color: var(--red); }
-.tl-current { display: flex; align-items: center; }
-.terminal-prompt { color: var(--green); white-space: pre; flex-shrink: 0; }
-.terminal-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--fg-bright);
-  font-family: var(--mono);
-  font-size: 12.5px;
-  caret-color: var(--cursor);
-}
+  .lp-node.lp-current {
+    @apply border-nvim-accent bg-nvim-accent text-nvim-bg animation-[pulse_2s_infinite];
+  }
 
-/* ---------------- VFS bar ---------------- */
-.vfs-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: var(--bg-darker);
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  flex-shrink: 0;
-}
-.vfs-btn {
-  background: var(--bg-float);
-  border: 1px solid var(--border);
-  color: var(--fg-dim);
-  padding: 2px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 11.5px;
-  font-family: var(--mono);
-  transition: all .15s;
-}
-.vfs-btn:hover { border-color: var(--accent); color: var(--fg-bright); }
-.vfs-btn-on { border-color: var(--green); color: var(--green); }
-.vfs-file-indicator {
-  margin-left: auto;
-  color: var(--fg-dim);
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.vfs-file-indicator strong { color: var(--accent); }
-.vfs-exit {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--fg-dim);
-  padding: 1px 6px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 11px;
-}
-.vfs-exit:hover { border-color: var(--red); color: var(--red); }
+  .lp-node.lp-current .lp-star {
+    @apply text-white text-2xl;
+  }
 
-/* ---------------- VFS editor header ---------------- */
-.vfs-header {
-  padding: 6px 14px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-alt);
-}
-.vfs-path { color: var(--accent); font-family: var(--mono); font-size: 13px; }
-.vfs-hint { color: var(--fg-dim); font-size: 11px; }
+  .lp-node.lp-locked {
+    @apply opacity-50 cursor-not-allowed;
+  }
 
-/* ---------------- Mode toggle ---------------- */
-.mode-toggle {
-  display: flex;
-  gap: 4px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.mode-btn {
-  flex: 1;
-  padding: 5px 0;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--fg-dim);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all .15s;
-}
-.mode-btn:hover { background: var(--bg-float); color: var(--fg); }
-.mode-btn.mode-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #16181e;
-  font-weight: 600;
-}
+  .lp-node.lp-locked .lp-lock {
+    @apply text-lg opacity-75;
+  }
 
-/* ---------------- Lesson Path (Simple mode) ---------------- */
-.lesson-path {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 0 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .lp-icon {
+    @apply text-lg;
+  }
 
-.lp-section { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .lp-node-title {
+    @apply text-center text-xs text-nvim-fg-dim mt-1 max-w-xs truncate;
+  }
 
-.lp-section-banner {
-  width: 100%;
-  padding: 8px 16px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.lp-section-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #1e222a;
-}
+  .lp-node-row.lp-current .lp-node-title {
+    @apply text-nvim-accent;
+  }
 
-.lp-node-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  transition: transform .15s;
-}
+  .lp-end {
+    @apply pt-6 pb-2 px-4 flex flex-col items-center gap-1.5 text-nvim-fg-dim text-xs;
+  }
 
-.lp-connector {
-  display: block;
-  overflow: visible;
-}
+  .lp-end span {
+    @apply text-4xl;
+  }
 
-.lp-start-badge {
-  background: var(--accent);
-  color: #1e222a;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  margin-bottom: 4px;
-}
+  /* NvimTree */
+  .nvimtree {
+    @apply w-tree min-w-tree bg-nvim-bg-sidebar border-r border-nvim-border
+      flex flex-col overflow-hidden text-base;
+  }
 
-.lp-node {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
-  position: relative;
-}
-.lp-node:not(:disabled):hover { transform: scale(1.1); }
+  .nvimtree-header {
+    @apply flex items-center justify-between gap-2 px-2.5 py-1.5
+      bg-nvim-bg-darker border-b border-nvim-border;
+  }
 
-/* Done */
-.lp-node.lp-done {
-  background: var(--green);
-  border-color: #6da35a;
-  box-shadow: 0 4px 0 #6da35a;
-}
-.lp-node.lp-done .lp-icon { color: #1e222a; font-size: 20px; font-weight: 700; }
+  .nvimtree-title {
+    @apply text-nvim-accent text-xs font-semibold;
+  }
 
-/* Current */
-.lp-node.lp-current {
-  background: var(--accent);
-  border-color: #5a82d4;
-  box-shadow: 0 4px 0 #5a82d4, 0 0 0 4px rgba(122,162,247,0.25);
-  animation: lp-pulse 2s ease-in-out infinite;
-  width: 62px;
-  height: 62px;
-}
-.lp-node.lp-current .lp-star { color: #fff; font-size: 26px; }
-@keyframes lp-pulse {
-  0%, 100% { box-shadow: 0 4px 0 #5a82d4, 0 0 0 4px rgba(122,162,247,0.25); }
-  50%       { box-shadow: 0 4px 0 #5a82d4, 0 0 0 8px rgba(122,162,247,0.15); }
-}
+  .nvimtree-keys {
+    @apply text-nvim-fg-dim text-xs ml-1.5 flex-1;
+  }
 
-/* Locked */
-.lp-node.lp-locked {
-  background: var(--bg-float);
-  border-color: var(--border);
-  box-shadow: 0 4px 0 var(--border);
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.lp-node.lp-locked .lp-lock { font-size: 18px; filter: grayscale(1); }
+  .nvimtree-close {
+    @apply bg-transparent border-0 text-nvim-fg-dim cursor-pointer text-lg
+      p-0.5 leading-none hover:text-nvim-fg-bright transition-colors;
+  }
 
-.lp-node-title {
-  margin-top: 5px;
-  font-size: 10px;
-  color: var(--fg-dim);
-  text-align: center;
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.lp-current + .lp-node-title,
-.lp-node-row.lp-current .lp-node-title { color: var(--accent); }
+  .nvimtree-root-label {
+    @apply px-2.5 py-1 text-nvim-fg-dim text-xs border-b border-nvim-border;
+  }
 
-.lp-end {
-  padding: 24px 0 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  color: var(--fg-dim);
-  font-size: 12px;
-}
-.lp-end span { font-size: 28px; }
+  .nvimtree-body {
+    @apply overflow-y-auto flex-1 py-1;
+  }
 
-/* ---------------- NvimTree inline CRUD ---------------- */
-.nt-inline-input {
-  background: var(--bg-active);
-  border: 1px solid var(--accent);
-  border-radius: 3px;
-  color: var(--fg);
-  font-size: 12px;
-  font-family: var(--mono);
-  padding: 1px 5px;
-  outline: none;
-  flex: 1;
-  min-width: 0;
-}
-.nt-new { opacity: 0.85; }
-.nt-confirm {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: var(--bg-active);
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--fg);
-}
-.nt-confirm strong { color: var(--red); }
-.nt-confirm-yes {
-  background: var(--red); color: #fff; border: none;
-  border-radius: 3px; padding: 2px 8px; font-size: 11px; cursor: pointer;
-}
-.nt-confirm-no {
-  background: var(--bg-sel); color: var(--fg); border: none;
-  border-radius: 3px; padding: 2px 8px; font-size: 11px; cursor: pointer;
-}
+  .nt-item {
+    @apply flex items-center gap-1.5 px-2 py-0.75 cursor-pointer
+      select-none transition-colors duration-100 text-sm;
+  }
 
-/* ---------------- VFS Preview ---------------- */
-.vfs-preview {
-  flex-shrink: 0;
-  height: 360px;
-  border-top: 2px solid var(--blue);
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  overflow: hidden;
-}
-.vfs-preview-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 10px;
-  background: var(--bg-darker);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.vfs-preview-label { color: var(--blue); font-size: 12px; font-weight: 600; font-family: var(--mono); }
-.vfs-preview-hint { color: var(--fg-dim); font-size: 11px; flex: 1; }
-.vfs-preview-close {
-  background: none; border: none; color: var(--fg-dim);
-  cursor: pointer; font-size: 14px; padding: 0 3px; line-height: 1;
-}
-.vfs-preview-close:hover { color: var(--fg-bright); }
-.vfs-preview-frame {
-  flex: 1;
-  border: none;
-  width: 100%;
-  background: #fff;
+  .nt-item:hover {
+    @apply bg-nvim-bg-sel;
+  }
+
+  .nt-active {
+    @apply bg-nvim-bg-sel !important text-nvim-fg-bright !important;
+  }
+
+  .nt-cursor {
+    @apply bg-nvim-accent !important text-nvim-bg !important;
+  }
+
+  .nt-cursor .nt-icon,
+  .nt-cursor .nt-arrow {
+    @apply text-nvim-bg !important;
+  }
+
+  .nt-arrow {
+    @apply text-nvim-fg-dim text-xs min-w-2.5;
+  }
+
+  .nt-icon {
+    @apply text-nvim-blue text-sm;
+  }
+
+  .nt-dir .nt-icon {
+    @apply text-nvim-accent;
+  }
+
+  .nt-name {
+    @apply text-nvim-fg overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .nt-inline-input {
+    @apply bg-nvim-bg-float border border-nvim-accent rounded text-nvim-fg
+      text-xs font-mono px-1.5 py-0.5 outline-none flex-1 min-w-0;
+  }
+
+  .nt-new {
+    @apply opacity-85;
+  }
+
+  .nt-confirm {
+    @apply flex items-center gap-1.5 px-2.5 py-1.25 bg-nvim-bg-float
+      border-t border-nvim-border text-xs text-nvim-fg;
+  }
+
+  .nt-confirm strong {
+    @apply text-nvim-red;
+  }
+
+  .nt-confirm-yes {
+    @apply bg-nvim-red text-white border-0 rounded px-2 py-0.5
+      text-xs cursor-pointer;
+  }
+
+  .nt-confirm-no {
+    @apply bg-nvim-bg-sel text-nvim-fg border-0 rounded px-2 py-0.5
+      text-xs cursor-pointer;
+  }
+
+  /* Terminal */
+  .terminal {
+    @apply flex-shrink-0 h-64 bg-nvim-bg-darker border-t-2 border-nvim-green
+      flex flex-col font-mono text-sm overflow-hidden cursor-text;
+  }
+
+  .terminal-titlebar {
+    @apply flex items-center gap-2 px-2.5 py-1 border-b border-nvim-border;
+  }
+
+  .terminal-cwd {
+    @apply text-nvim-fg-dim text-xs;
+  }
+
+  .terminal-label {
+    @apply text-nvim-fg-bright text-xs font-bold;
+  }
+
+  .terminal-close {
+    @apply ml-auto bg-transparent border-0 text-nvim-fg-dim cursor-pointer
+      text-lg p-0 leading-none hover:text-nvim-fg-bright;
+  }
+
+  .terminal-body {
+    @apply overflow-y-auto flex-1 px-2.5 py-1.5 flex flex-col;
+  }
+
+  .tl {
+    @apply text-sm leading-relaxed font-mono text-nvim-fg-dim;
+  }
+
+  .tl-input {
+    @apply text-nvim-fg flex items-center gap-1.5;
+  }
+
+  .tl-output {
+    @apply text-nvim-fg;
+  }
+
+  .tl-error {
+    @apply text-nvim-red;
+  }
+
+  .tl-current {
+    @apply bg-nvim-bg-float;
+  }
+
+  .tl-tab-candidates {
+    @apply text-nvim-cyan py-1;
+  }
+
+  .terminal-prompt {
+    @apply text-nvim-green font-bold flex-shrink-0;
+  }
+
+  .terminal-input {
+    @apply bg-transparent border-0 outline-none text-nvim-fg font-mono
+      text-sm flex-1 min-w-0;
+  }
+
+  /* VFS Preview */
+  .vfs-preview {
+    @apply flex-shrink-0 h-96 border-t-2 border-nvim-blue
+      flex flex-col bg-white overflow-hidden;
+  }
+
+  .vfs-preview-bar {
+    @apply flex items-center gap-2.5 px-2.5 py-1 bg-nvim-bg-darker
+      border-b border-nvim-border flex-shrink-0;
+  }
+
+  .vfs-preview-label {
+    @apply text-nvim-blue text-xs font-semibold font-mono;
+  }
+
+  .vfs-preview-hint {
+    @apply text-nvim-fg-dim text-xs flex-1;
+  }
+
+  .vfs-preview-close {
+    @apply bg-transparent border-0 text-nvim-fg-dim cursor-pointer
+      text-sm p-0.75 leading-none hover:text-nvim-fg-bright;
+  }
+
+  .vfs-preview-frame {
+    @apply flex-1 border-0 w-full bg-white;
+  }
+
+  /* VFS Bar */
+  .vfs-bar {
+    @apply flex-shrink-0 flex items-center gap-2 px-2.5 py-1
+      bg-nvim-bg-darker border-t border-nvim-border text-xs;
+  }
+
+  .vfs-btn {
+    @apply px-2.5 py-1.5 rounded-lg border border-nvim-border
+      text-nvim-fg-dim bg-nvim-bg-sidebar cursor-pointer text-xs
+      hover:text-nvim-fg transition-colors;
+  }
+
+  .vfs-btn-on {
+    @apply bg-nvim-accent text-nvim-bg border-nvim-accent;
+  }
+
+  .vfs-file-indicator {
+    @apply ml-auto text-nvim-fg-dim text-xs;
+  }
+
+  .vfs-file-indicator strong {
+    @apply text-nvim-fg;
+  }
+
+  .vfs-exit {
+    @apply ml-2 bg-transparent border-0 text-nvim-fg-dim cursor-pointer
+      text-xs hover:text-nvim-red transition-colors;
+  }
+
+  .vfs-header {
+    @apply px-4 py-2 border-b border-nvim-border flex items-center gap-2;
+  }
+
+  .vfs-path {
+    @apply text-nvim-fg text-xs;
+  }
+
+  .vfs-hint {
+    @apply text-nvim-fg-dim text-xs ml-auto;
+  }
+
+  /* Editor & Console */
+  .editor {
+    @apply flex-1 flex flex-col overflow-hidden bg-nvim-bg;
+  }
+
+  .console {
+    @apply flex-shrink-0 bg-nvim-bg-darker border-t border-nvim-border
+      overflow-hidden;
+  }
+
+  .btn-ghost {
+    @apply px-3 py-1.5 rounded text-nvim-fg-dim bg-transparent border border-nvim-border
+      text-xs cursor-pointer hover:text-nvim-fg hover:border-nvim-border transition-colors;
+  }
+
+  .btn-primary {
+    @apply px-3 py-1.5 rounded bg-nvim-accent text-nvim-bg border-0
+      text-xs font-medium cursor-pointer hover:opacity-90 transition-opacity;
+  }
+
+  /* Animations */
+  @keyframes pulse {
+    0%,
+    100% {
+      @apply opacity-100;
+    }
+    50% {
+      @apply opacity-75;
+    }
+  }
 }

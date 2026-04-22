@@ -198,7 +198,7 @@ export default function NvimTree({ root, cwd, openFilePath, onSelect, onClose, o
       className="nvimtree"
       tabIndex={0}
       onKeyDown={onKeyDown}
-      style={{ outline: "none" }}
+      className="outline-none"
     >
       <div className="nvimtree-header">
         <span className="nvimtree-title">NvimTree</span>
