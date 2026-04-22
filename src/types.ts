@@ -109,6 +109,7 @@ export interface UseSimulatorCallbacks {
   onQuit?: () => void;
   onNvimTreeToggle?: () => void;
   onTerminalToggle?: () => void;
+  onOpenFile?: (pathStr: string) => void;
 }
 
 export interface UseSimulatorReturn {

@@ -122,6 +122,24 @@ button { font-family: inherit; cursor: pointer; }
 }
 .brand-title { font-weight: 700; color: var(--fg-bright); font-size: 15px; }
 .brand-sub { font-size: 11px; color: var(--fg-dim); }
+.brand-github {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: var(--bg-active);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg-dim);
+  text-decoration: none;
+  font-size: 11px;
+  transition: color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.brand-github:hover { color: var(--fg-bright); border-color: var(--fg-dim); }
+.brand-github-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.brand-github-stars { font-weight: 600; color: var(--accent); letter-spacing: .3px; }
 
 .progress-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--fg-dim); margin-bottom: 6px; }
@@ -915,3 +933,70 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 12px;
 }
 .lp-end span { font-size: 28px; }
+
+/* ---------------- NvimTree inline CRUD ---------------- */
+.nt-inline-input {
+  background: var(--bg-active);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--fg);
+  font-size: 12px;
+  font-family: var(--mono);
+  padding: 1px 5px;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+}
+.nt-new { opacity: 0.85; }
+.nt-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--bg-active);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--fg);
+}
+.nt-confirm strong { color: var(--red); }
+.nt-confirm-yes {
+  background: var(--red); color: #fff; border: none;
+  border-radius: 3px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+}
+.nt-confirm-no {
+  background: var(--bg-sel); color: var(--fg); border: none;
+  border-radius: 3px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+}
+
+/* ---------------- VFS Preview ---------------- */
+.vfs-preview {
+  flex-shrink: 0;
+  height: 360px;
+  border-top: 2px solid var(--blue);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+}
+.vfs-preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.vfs-preview-label { color: var(--blue); font-size: 12px; font-weight: 600; font-family: var(--mono); }
+.vfs-preview-hint { color: var(--fg-dim); font-size: 11px; flex: 1; }
+.vfs-preview-close {
+  background: none; border: none; color: var(--fg-dim);
+  cursor: pointer; font-size: 14px; padding: 0 3px; line-height: 1;
+}
+.vfs-preview-close:hover { color: var(--fg-bright); }
+.vfs-preview-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  background: #fff;
+}

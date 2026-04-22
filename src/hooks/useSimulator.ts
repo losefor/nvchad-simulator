@@ -46,7 +46,7 @@ function createInitialState(): SimulatorState {
   };
 }
 
-export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle }: UseSimulatorCallbacks): UseSimulatorReturn {
+export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle, onOpenFile }: UseSimulatorCallbacks): UseSimulatorReturn {
   const sRef = useRef<SimulatorState>(createInitialState());
   const [, setTick] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(() => {
@@ -62,9 +62,9 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
   const handleKeyRef = useRef<((e: KeyboardEvent) => void) | null>(null);
   const lastFindRef = useRef<{ char: string; till: boolean; back: boolean } | null>(null);
 
-  const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle });
+  const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle, onOpenFile });
   useEffect(() => {
-    cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle };
+    cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle, onOpenFile };
   }, [onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle]);
 
   const curLine = () => sRef.current.buffer[sRef.current.cursor[0]];
@@ -513,6 +513,12 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
     }
     if (cmd === "wq" || cmd === "x") { s.modified = false; s.flags.saved = true; cb.current.onSave?.(s.buffer.slice()); cb.current.onQuit?.(); return; }
     if (cmd === "q!") { cb.current.onQuit?.(); return; }
+    if (cmd.startsWith("e ") || cmd.startsWith("edit ")) {
+      const file = cmd.replace(/^e(?:dit)?\s+/, "").trim();
+      if (!file) { cb.current.onMessage("E474: Invalid argument", "error"); return; }
+      cb.current.onOpenFile?.(file);
+      return;
+    }
     if (cmd === "noh" || cmd === "nohlsearch") { s.lastSearch = ""; cb.current.onMessage("search cleared"); return; }
     if (/^\d+$/.test(cmd)) { s.cursor = [clamp(parseInt(cmd, 10) - 1, 0, s.buffer.length - 1), 0]; return; }
     const sub = cmd.match(/^(%)?s\/([^/]*)\/([^/]*)\/([gic]*)?$/);

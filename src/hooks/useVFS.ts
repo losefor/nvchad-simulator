@@ -12,7 +12,7 @@ export interface TerminalLine {
 
 export interface CommandResult {
   lines: TerminalLine[];
-  action?: { type: "open"; pathStr: string } | { type: "clear" };
+  action?: { type: "open"; pathStr: string } | { type: "clear" } | { type: "export" } | { type: "history" };
 }
 
 export interface OpenedFile {
@@ -223,6 +223,103 @@ export function useVFS() {
       case "clear":
         return { lines: [], action: { type: "clear" } };
 
+      case "reset": {
+        const confirm = args[0];
+        if (confirm !== "-y") {
+          print("This will reset the VFS to defaults (all changes lost).");
+          print("Run 'reset -y' to confirm.");
+          break;
+        }
+        setVFS(createInitialVFS());
+        return { lines: [{ kind: "output", text: "VFS reset to defaults." }], action: { type: "clear" } };
+      }
+
+      case "tree": {
+        const targetPath = args[0] ? resolve(args[0]) : currentVFS.cwd;
+        const targetNode = getNode(currentVFS.root, targetPath);
+        if (!targetNode) { err(`tree: ${args[0]}: No such file or directory`); break; }
+        if (targetNode.type !== "dir") { err(`tree: ${args[0]}: Not a directory`); break; }
+        const label = args[0] ?? pathToStr(currentVFS.cwd);
+        print(label);
+        let count = { files: 0, dirs: 0 };
+        function walkTree(dir: typeof targetNode & { type: "dir" }, prefix: string) {
+          const entries = Object.entries(dir.children).sort(([a, na], [b, nb]) => {
+            if (na.type !== nb.type) return na.type === "dir" ? -1 : 1;
+            return a.localeCompare(b);
+          });
+          entries.forEach(([name, node], i) => {
+            const isLast = i === entries.length - 1;
+            const connector = isLast ? "└── " : "├── ";
+            const childPrefix = prefix + (isLast ? "    " : "│   ");
+            print(prefix + connector + name + (node.type === "dir" ? "/" : ""));
+            if (node.type === "dir") { count.dirs++; walkTree(node, childPrefix); }
+            else count.files++;
+          });
+        }
+        walkTree(targetNode as typeof targetNode & { type: "dir" }, "");
+        print(`\n${count.dirs} director${count.dirs === 1 ? "y" : "ies"}, ${count.files} file${count.files === 1 ? "" : "s"}`);
+        break;
+      }
+
+      case "head":
+      case "tail": {
+        const nFlag = args.indexOf("-n");
+        const n = nFlag >= 0 ? parseInt(args[nFlag + 1] ?? "10", 10) : 10;
+        const fileArg = args.find(a => !a.startsWith("-") && !/^\d+$/.test(a));
+        if (!fileArg) { err(`${cmd}: missing file operand`); break; }
+        const p = resolve(fileArg);
+        const node = getNode(currentVFS.root, p);
+        if (!node) { err(`${cmd}: ${fileArg}: No such file or directory`); break; }
+        if (node.type !== "file") { err(`${cmd}: ${fileArg}: Is a directory`); break; }
+        const lines2 = cmd === "head" ? node.content.slice(0, n) : node.content.slice(-n);
+        lines2.forEach(l => print(l));
+        break;
+      }
+
+      case "grep": {
+        if (args.length < 2) { err("grep: usage: grep <pattern> <file>"); break; }
+        const patArg = args[0];
+        const fileArg = args[1];
+        let re: RegExp;
+        try { re = new RegExp(patArg, "g"); } catch { err(`grep: invalid pattern: ${patArg}`); break; }
+        const p = resolve(fileArg);
+        const node = getNode(currentVFS.root, p);
+        if (!node) { err(`grep: ${fileArg}: No such file or directory`); break; }
+        if (node.type !== "file") { err(`grep: ${fileArg}: Is a directory`); break; }
+        let matched = 0;
+        node.content.forEach((line, i) => {
+          re.lastIndex = 0;
+          if (re.test(line)) { print(`${i + 1}: ${line}`); matched++; }
+        });
+        if (matched === 0) print("(no matches)");
+        break;
+      }
+
+      case "wc": {
+        const fileArg = args.find(a => !a.startsWith("-"));
+        if (!fileArg) { err("wc: missing file operand"); break; }
+        const p = resolve(fileArg);
+        const node = getNode(currentVFS.root, p);
+        if (!node) { err(`wc: ${fileArg}: No such file or directory`); break; }
+        if (node.type !== "file") { err(`wc: ${fileArg}: Is a directory`); break; }
+        const text = node.content.join("\n");
+        const lineCount = node.content.length;
+        const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const charCount = text.length;
+        if (args.includes("-l")) { print(String(lineCount)); break; }
+        if (args.includes("-w")) { print(String(wordCount)); break; }
+        if (args.includes("-c")) { print(String(charCount)); break; }
+        print(`${lineCount}\t${wordCount}\t${charCount}\t${fileArg}`);
+        break;
+      }
+
+      case "export": {
+        return { lines: out, action: { type: "export" as "export" } };
+      }
+
+      case "history":
+        return { lines: out, action: { type: "history" as "history" } };
+
       case "help":
         print("Available commands:");
         print("  ls [-l] [path]         list directory");
@@ -237,8 +334,16 @@ export function useVFS() {
         print("  rm [-rf] <path>        remove file/directory");
         print("  cp <src> <dst>         copy file");
         print("  mv <src> <dst>         move/rename file");
+        print("  head [-n N] <file>     first N lines (default 10)");
+        print("  tail [-n N] <file>     last N lines (default 10)");
+        print("  grep <pattern> <file>  search file with regex");
+        print("  wc [-l|-w|-c] <file>   count lines/words/chars");
+        print("  tree [path]            show directory tree");
         print("  nvim <file>            open file in editor");
         print("  clear                  clear terminal");
+        print("  reset [-y]             reset VFS to defaults");
+        print("  export                 download VFS as JSON");
+        print("  history                show command history");
         break;
 
       default:
@@ -250,6 +355,32 @@ export function useVFS() {
 
   const saveFile = useCallback((path: string[], content: string[]) => {
     setVFS(v => ({ ...v, root: setNode(v.root, path, makeFile(content)) }));
+  }, []);
+
+  const createDir = useCallback((path: string[]) => {
+    setVFS(v => ({ ...v, root: setNode(v.root, path, makeDir()) }));
+  }, []);
+
+  const deleteItem = useCallback((path: string[]) => {
+    setVFS(v => {
+      const newRoot = deleteNode(v.root, path);
+      // Reset cwd if it was inside deleted path
+      const cwdStr = v.cwd.join("/");
+      const delStr = path.join("/");
+      const newCwd = cwdStr.startsWith(delStr) ? path.slice(0, -1) : v.cwd;
+      return { root: newRoot, cwd: newCwd };
+    });
+  }, []);
+
+  const renameItem = useCallback((oldPath: string[], newName: string) => {
+    setVFS(v => {
+      const node = getNode(v.root, oldPath);
+      if (!node) return v;
+      const newPath = [...oldPath.slice(0, -1), newName];
+      const withNew = setNode(v.root, newPath, node);
+      const withoutOld = deleteNode(withNew, oldPath);
+      return { ...v, root: withoutOld };
+    });
   }, []);
 
   const openFile = useCallback((pathStr: string, cwd: string[]): OpenedFile => {
@@ -269,5 +400,33 @@ export function useVFS() {
     };
   }, [vfs]);
 
-  return { vfs, runCommand, saveFile, openFile };
+  const getCompletions = useCallback((input: string, currentVFS: VFS): string[] => {
+    const tokens = tokenize(input);
+    const COMMANDS = ["ls", "cd", "pwd", "mkdir", "touch", "cat", "echo", "rm", "cp", "mv",
+      "nvim", "clear", "reset", "tree", "head", "tail", "grep", "wc", "export", "history", "help"];
+
+    // Complete command name
+    if (tokens.length === 0 || (tokens.length === 1 && !input.endsWith(" "))) {
+      const partial = tokens[0] ?? "";
+      return COMMANDS.filter(c => c.startsWith(partial));
+    }
+
+    // Complete path argument
+    const partial = input.endsWith(" ") ? "" : (tokens[tokens.length - 1] ?? "");
+    const slashIdx = partial.lastIndexOf("/");
+    const dirPart = slashIdx >= 0 ? partial.slice(0, slashIdx) : "";
+    const namePart = slashIdx >= 0 ? partial.slice(slashIdx + 1) : partial;
+
+    const dirPath = dirPart
+      ? resolvePath(currentVFS.cwd, dirPart)
+      : currentVFS.cwd;
+    const dirNode = getNode(currentVFS.root, dirPath);
+    if (!dirNode || dirNode.type !== "dir") return [];
+
+    return Object.entries(dirNode.children)
+      .filter(([name]) => name.startsWith(namePart))
+      .map(([name, node]) => (dirPart ? dirPart + "/" : "") + name + (node.type === "dir" ? "/" : ""));
+  }, []);
+
+  return { vfs, runCommand, saveFile, openFile, createDir, deleteItem, renameItem, getCompletions };
 }

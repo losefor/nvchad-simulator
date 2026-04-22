@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LESSONS } from "./data/lessons";
 import { useSimulator } from "./hooks/useSimulator";
 import { useVFS } from "./hooks/useVFS";
@@ -10,6 +10,7 @@ import Cheatsheet from "./components/Cheatsheet";
 import Telescope from "./components/Telescope";
 import NvimTree from "./components/NvimTree";
 import Terminal from "./components/Terminal";
+import VFSPreview from "./components/VFSPreview";
 import Toast from "./components/Toast";
 
 interface VfsFile {
@@ -28,9 +29,10 @@ export default function App() {
   const [telescopeOpen, setTelescopeOpen] = useState<{ type: "files" | "grep" | "buffers" } | null>(null);
   const [nvimTreeOpen, setNvimTreeOpen] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [vfsFile, setVfsFile] = useState<VfsFile | null>(null);
 
-  const { vfs, runCommand, saveFile, openFile } = useVFS();
+  const { vfs, runCommand, saveFile, openFile, createDir, deleteItem, renameItem, getCompletions } = useVFS();
 
   const onToast = useCallback((text: string, kind: Message["kind"]) => {
     setToast({ text, kind });
@@ -69,6 +71,16 @@ export default function App() {
     }
   }, [vfsFile, saveFile, onMessage]);
 
+  // Ref bridge: loadBuffer comes from useSimulator, but onOpenFile is passed into it
+  const loadBufferRef = useRef<((lines: string[]) => void) | undefined>(undefined);
+  const onOpenFile = useCallback((pathStr: string) => {
+    const file = openFile(pathStr, vfs.cwd);
+    setVfsFile({ path: file.path, name: file.name });
+    loadBufferRef.current?.(file.content);
+    setTerminalOpen(false);
+    onMessage(`Opened: ${file.name}`, "info");
+  }, [openFile, vfs.cwd, onMessage]);
+
   const {
     state,
     completed,
@@ -79,16 +91,14 @@ export default function App() {
     skipLesson
   } = useSimulator({
     onToast, onMessage, onKeyLog, onCheatsheetRequested,
-    onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle
+    onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle,
+    onOpenFile,
   });
 
-  const handleOpenFile = useCallback((pathStr: string) => {
-    const file = openFile(pathStr, vfs.cwd);
-    setVfsFile({ path: file.path, name: file.name });
-    loadBuffer(file.content);
-    setTerminalOpen(false);
-    onMessage(`Opened: ${file.name}`, "info");
-  }, [openFile, vfs.cwd, loadBuffer, onMessage]);
+  // Keep ref in sync every render (safe — doesn't trigger re-render)
+  loadBufferRef.current = loadBuffer;
+
+  const handleOpenFile = onOpenFile;
 
   const handleNvimTreeSelect = useCallback((path: string[]) => {
     const name = path[path.length - 1] ?? "untitled";
@@ -159,9 +169,16 @@ export default function App() {
       {nvimTreeOpen && (
         <NvimTree
           root={vfs.root}
+          cwd={vfs.cwd}
           openFilePath={vfsFile?.path ?? null}
           onSelect={handleNvimTreeSelect}
           onClose={() => setNvimTreeOpen(false)}
+          onCreate={(path, isDir) => {
+            if (isDir) createDir(path);
+            else saveFile(path, [""]);
+          }}
+          onRename={renameItem}
+          onDelete={deleteItem}
         />
       )}
 
@@ -172,9 +189,12 @@ export default function App() {
           <Terminal
             vfs={vfs}
             runCommand={runCommand}
+            getCompletions={getCompletions}
             onOpenFile={handleOpenFile}
             onClose={() => setTerminalOpen(false)}
           />
+        ) : previewOpen ? (
+          <VFSPreview vfs={vfs} onClose={() => setPreviewOpen(false)} />
         ) : (
           <Console
             lesson={currentLesson}
@@ -195,10 +215,17 @@ export default function App() {
           </button>
           <button
             className={"vfs-btn" + (terminalOpen ? " vfs-btn-on" : "")}
-            onClick={() => setTerminalOpen(o => !o)}
+            onClick={() => { setTerminalOpen(o => !o); setPreviewOpen(false); }}
             title="Toggle Terminal"
           >
              Terminal
+          </button>
+          <button
+            className={"vfs-btn" + (previewOpen ? " vfs-btn-on" : "")}
+            onClick={() => { setPreviewOpen(o => !o); setTerminalOpen(false); }}
+            title="Toggle Preview"
+          >
+             Preview
           </button>
           {vfsFile && (
             <span className="vfs-file-indicator">

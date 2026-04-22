@@ -341,3 +341,47 @@ Built as an interactive learning tool to help developers master Neovim and NvCha
 **Happy Learning! 🚀**
 
 Master vim one lesson at a time. Start with the basics and progress through increasingly advanced vim techniques and NvChad-specific workflows.
+
+---
+
+## Browser Limitations
+
+The following features are constrained by the browser environment and cannot be fully implemented.
+
+### File System
+| Limitation | Reason |
+|---|---|
+| **Binary files not supported** | VFS stores files as text (string arrays). Images, fonts, PDFs etc. cannot be created or edited. |
+| **Storage capped at ~5–10 MB** | VFS is persisted in `localStorage`. Exceeding the browser quota causes silent save failures. |
+| **No true file watching** | Preview re-renders only on `:w` (save). There is no background file watcher. |
+| **No VFS import (upload)** | `export` downloads VFS as JSON; restoring requires manually pasting JSON into the browser console. |
+
+### Terminal
+| Limitation | Reason |
+|---|---|
+| **No shell scripting** | Bash/sh scripts (shebangs, conditionals, loops) cannot be executed. Only the built-in command set works. |
+| **No pipes between commands** | `cat file \| grep pattern` is not supported — use `grep pattern file` directly. |
+| **No background processes** | `&`, `nohup`, `jobs`, `kill` are unavailable. |
+| **No package managers** | `npm`, `pip`, `brew` etc. require a real OS process and cannot run in the browser. |
+
+### Preview iframe
+| Limitation | Reason |
+|---|---|
+| **External resources blocked** | The preview iframe runs in a `sandbox="allow-scripts"` context. `fetch()` / `XHR` to external URLs are blocked by CORS / sandbox policy. |
+| **Local images/video/audio don't render** | `<img src="./photo.jpg">` cannot resolve a VFS file. Only absolute `https://` URLs load. |
+| **No `localStorage` inside preview** | The sandboxed iframe cannot access storage APIs. |
+| **No `<form>` submissions** | Form actions that navigate the page are disabled by the sandbox. |
+| **Server-side code can't run** | PHP, Python, Node.js, Ruby etc. need a real server process. Only static HTML/CSS/JS works in the preview. |
+
+### Editor
+| Limitation | Reason |
+|---|---|
+| **No language-aware syntax highlighting** | The editor uses a generic token highlighter. LSP features (autocomplete, diagnostics, formatting) are not available. |
+| **Single buffer at a time** | There are no true split windows or multi-buffer tabs; switching files replaces the current buffer. |
+| **Undo history lost on refresh** | Undo/redo (`u` / `Ctrl-r`) works within a session but is not persisted across page reloads. |
+
+### Misc
+| Limitation | Reason |
+|---|---|
+| **No Git** | `git init`, `git commit` etc. require a real OS process. |
+| **No network access from VFS scripts** | JS running inside the preview sandbox cannot make requests to arbitrary servers. |
