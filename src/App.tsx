@@ -56,6 +56,11 @@ export default function App() {
   const onNvimTreeToggle = useCallback(() => setNvimTreeOpen(o => !o), []);
   const onTerminalToggle = useCallback(() => setTerminalOpen(o => !o), []);
 
+  const onQuit = useCallback(() => {
+    setVfsFile(null);
+    setTerminalOpen(true);
+  }, []);
+
   const onSave = useCallback((buffer: string[]) => {
     if (vfsFile) {
       saveFile(vfsFile.path, buffer);
@@ -73,7 +78,7 @@ export default function App() {
     skipLesson
   } = useSimulator({
     onToast, onMessage, onKeyLog, onCheatsheetRequested,
-    onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle
+    onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle
   });
 
   const handleOpenFile = useCallback((pathStr: string) => {

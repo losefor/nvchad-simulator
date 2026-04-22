@@ -46,7 +46,7 @@ function createInitialState(): SimulatorState {
   };
 }
 
-export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle }: UseSimulatorCallbacks): UseSimulatorReturn {
+export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle }: UseSimulatorCallbacks): UseSimulatorReturn {
   const sRef = useRef<SimulatorState>(createInitialState());
   const [, setTick] = useState(0);
   const [completed, setCompleted] = useState<Set<string>>(() => {
@@ -62,10 +62,10 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
   const handleKeyRef = useRef<((e: KeyboardEvent) => void) | null>(null);
   const lastFindRef = useRef<{ char: string; till: boolean; back: boolean } | null>(null);
 
-  const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle });
+  const cb = useRef({ onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle });
   useEffect(() => {
-    cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle };
-  }, [onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onNvimTreeToggle, onTerminalToggle]);
+    cb.current = { onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle };
+  }, [onToast, onMessage, onKeyLog, onCheatsheetRequested, onTelescopeOpen, onSave, onQuit, onNvimTreeToggle, onTerminalToggle]);
 
   const curLine = () => sRef.current.buffer[sRef.current.cursor[0]];
   const setCurLine = (str: string) => {
@@ -508,11 +508,11 @@ export function useSimulator({ onToast, onMessage, onKeyLog, onCheatsheetRequest
       return;
     }
     if (cmd === "q" || cmd === "quit") {
-      if (s.modified) { cb.current.onMessage("E37: No write since last change", "error"); return; }
-      cb.current.onMessage("(simulated: would quit Neovim)"); return;
+      if (s.modified) { cb.current.onMessage("E37: No write since last change (use :q! to force)", "error"); return; }
+      cb.current.onQuit?.(); return;
     }
-    if (cmd === "wq" || cmd === "x") { s.modified = false; s.flags.saved = true; cb.current.onMessage("written & quit (simulated)", "success"); return; }
-    if (cmd === "q!") { cb.current.onMessage("force quit (simulated)"); return; }
+    if (cmd === "wq" || cmd === "x") { s.modified = false; s.flags.saved = true; cb.current.onSave?.(s.buffer.slice()); cb.current.onQuit?.(); return; }
+    if (cmd === "q!") { cb.current.onQuit?.(); return; }
     if (cmd === "noh" || cmd === "nohlsearch") { s.lastSearch = ""; cb.current.onMessage("search cleared"); return; }
     if (/^\d+$/.test(cmd)) { s.cursor = [clamp(parseInt(cmd, 10) - 1, 0, s.buffer.length - 1), 0]; return; }
     const sub = cmd.match(/^(%)?s\/([^/]*)\/([^/]*)\/([gic]*)?$/);

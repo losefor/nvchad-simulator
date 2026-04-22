@@ -106,6 +106,7 @@ export interface UseSimulatorCallbacks {
   onCheatsheetRequested: () => void;
   onTelescopeOpen?: (type: "files" | "grep" | "buffers") => void;
   onSave?: (buffer: string[]) => void;
+  onQuit?: () => void;
   onNvimTreeToggle?: () => void;
   onTerminalToggle?: () => void;
 }
