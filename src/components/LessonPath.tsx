@@ -83,7 +83,7 @@ export default function LessonPath({ currentLesson, completed, onSelect }: Props
         const color = SECTION_COLORS[section.title] ?? "#7aa2f7";
         return (
           <div key={section.title} className="lp-section">
-            <div className="lp-section-banner" style={{ background: color }}>
+            <div className="lp-section-banner" style={{ backgroundColor: color }}>
               <span className="lp-section-label">{section.title}</span>
             </div>
 
